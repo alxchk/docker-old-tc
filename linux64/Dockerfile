@@ -156,8 +156,7 @@ RUN \
     rm -rf /usr/src && \
     apt-get clean
 
-RUN mkdir -p /build/workspace/project && \
-    chown build /build/workspace/project
+RUN mkdir -p /build/workspace/project
 
 FROM scratch
 COPY --from=0 / /
