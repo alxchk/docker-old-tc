@@ -168,7 +168,7 @@ ENV \
     LC_ALL=C \
     TERM= \
     DEBIAN_FRONTEND=noninteractive \
-    PATH=/usr/bin:/usr/sbin:/bin:/sbin:/build/workspace/project:/build/workspace/.local/bin \
+    PATH=/usr/local/bin:/usr/bin:/usr/sbin:/bin:/sbin:/build/workspace/project:/build/workspace/.local/bin \
     WORKSPACE=/build/workspace \
     PROJECT=/build/workspace/project \
     TOOLCHAIN_ARCH=amd64
