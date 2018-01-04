@@ -21,3 +21,4 @@ env:
   - TC=linux32
   - TC=linux64
   - TC=windows
+  - TC=android
