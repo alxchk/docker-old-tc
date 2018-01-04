@@ -21,12 +21,24 @@ RUN dpkg --add-architecture i386 && apt-get update && apt-get upgrade -y && \
     python-setuptools-git build-essential python-dev python-wheel \
     xauth xxd zip unzip && apt-get clean
 
-RUN mkdir -p /build/downloads /build/win32 /build/win64 /build/bootstrap
-COPY downloads/* /build/downloads/
+RUN \
+    mkdir -p \
+          /build/downloads \
+          /build/win32 \
+          /build/win64 \
+          /build/bootstrap
 
-RUN yes | pip install pylzma
 COPY windows.sh /build/bootstrap/
-RUN chmod +x /build/bootstrap/windows.sh && /usr/bin/xvfb-run /build/bootstrap/windows.sh
+
+RUN \
+    mkdir -p /build/workspace/project && \
+    chmod +x /build/bootstrap/windows.sh
+
+COPY downloads/* /build/downloads/
+RUN yes | pip install pylzma
+
+RUN /usr/bin/xvfb-run /build/bootstrap/windows.sh
+
 RUN apt-get remove python-pip python-setuptools-git \
     build-essential python-dev python-wheel; apt-get clean; apt-get autoremove; \
     rm -rf /build/bootstrap /build/downloads
@@ -43,7 +55,13 @@ ENV \
     CL64=/build/win64/cl.sh \
     MINGW64=x86_64-w64-mingw32-g++ \
     MINGW32=i686-w64-mingw32-g++ \
-    WINEDEBUG="-all"
+    WINEDEBUG="-all" \
+    PATH=/usr/bin:/usr/sbin:/bin:/sbin:/build/workspace/project:/build/workspace/.local/bin \
+    WORKSPACE=/build/workspace \
+    PROJECT=/build/workspace/project
+
+WORKDIR /build/workspace/project
+VOLUME /build/workspace/project
 
 LABEL maintainer "alxchk@gmail.com"
 LABEL version="1.0"

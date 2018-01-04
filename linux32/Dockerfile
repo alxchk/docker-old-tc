@@ -160,6 +160,8 @@ RUN \
     rm -rf /usr/src && \
     apt-get clean
 
+RUN mkdir -p /build/workspace/project
+
 FROM scratch
 COPY --from=0 / /
 
@@ -170,7 +172,12 @@ ENV \
     LC_ALL=C \
     TERM= \
     DEBIAN_FRONTEND=noninteractive \
-    PATH=/usr/bin:/usr/sbin:/bin:/sbin
+    PATH=/usr/bin:/usr/sbin:/bin:/sbin:/build/workspace/project:/build/workspace/.local/bin \
+    WORKSPACE=/build/workspace \
+    PROJECT=/build/workspace/project
+
+WORKDIR /build/workspace/project
+VOLUME /build/workspace/project
 
 LABEL maintainer "alxchk@gmail.com"
 LABEL version="1.0"
