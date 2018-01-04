@@ -157,7 +157,7 @@ RUN \
     find -name "*.py" | python -m compileall -qfi - && \
     find -name "*.py" | python -OO -m compileall -qfi - && \
     find -name "*.so" | while read f; do strip $f; done && \
-    rm -rf /usr/src && \
+    rm -rf /usr/src && ldconfig && \
     apt-get clean
 
 RUN mkdir -p /build/workspace/project
