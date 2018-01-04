@@ -174,7 +174,8 @@ ENV \
     DEBIAN_FRONTEND=noninteractive \
     PATH=/usr/bin:/usr/sbin:/bin:/sbin:/build/workspace/project:/build/workspace/.local/bin \
     WORKSPACE=/build/workspace \
-    PROJECT=/build/workspace/project
+    PROJECT=/build/workspace/project \
+    TOOLCHAIN_ARCH=x86
 
 WORKDIR /build/workspace/project
 VOLUME /build/workspace/project
