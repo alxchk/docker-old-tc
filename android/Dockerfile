@@ -6,7 +6,8 @@ ENV \
     LC_ALL=C \
     TERM= \
     DEBIAN_FRONTEND=noninteractive \
-    PATH=/usr/bin:/usr/sbin:/bin:/sbin:/usr/local/bin
+    PATH=/usr/bin:/usr/sbin:/bin:/sbin:/usr/local/bin \
+    BUILDOZER_CACHE=/build/buildozer
 
 RUN mkdir /build && dpkg --add-architecture i386 && \
 	mkdir -p /usr/share/man/man1/ && \
@@ -50,7 +51,7 @@ RUN \
 	rm -f /root/.buildozer/android/platform/*.tar.gz && \
 	rm -rf /root/.buildozer/android/platform/android-ndk-*/docs && \
 	rm -rf /root/.buildozer/android/platform/android-ndk-*/samples && \
-	rm -rf /build/.buildozer/android/platform/build/build/other_builds
+	rm -rf $BUILDOZER_CACHE/android/platform/build/build/other_builds
 
 
 FROM scratch
@@ -61,7 +62,7 @@ ENV \
     PATH=/usr/bin:/usr/sbin:/bin:/sbin:/usr/local/bin:/build/workspace/project:/root/.local/bin \
     WORKSPACE=/build/workspace \
     PROJECT=/build/workspace/project \
-    BUILDOZER_CACHE=/build/.buildozer
+    BUILDOZER_CACHE=/build/buildozer
 
 WORKDIR /build/workspace/project
 VOLUME /build/workspace/project
