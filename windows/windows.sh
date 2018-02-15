@@ -79,14 +79,9 @@ wineserver -k || true
 unset WINEPREFIX
 
 for prefix in $WINE32 $WINE64; do
-    WINEPREFIX=$prefix wine C:\\Python27\\python -OO -m pip install -q --upgrade pip
-    WINEPREFIX=$prefix wine C:\\Python27\\python -OO -m pip install -q --upgrade setuptools
-    WINEPREFIX=$prefix wine C:\\Python27\\python -OO -m pip install -q pycparser==2.17
-done
-
-for prefix in $WINE32 $WINE64; do
-    WINEPREFIX=$prefix wine C:\\Python27\\python -m compileall -q C:\\Python27\\Lib || true
-    WINEPREFIX=$prefix wine C:\\Python27\\python -OO -m compileall -q C:\\Python27\\Lib || true
+    WINEPREFIX=$prefix wine C:\\Python27\\python -m pip install -q --upgrade pip
+    WINEPREFIX=$prefix wine C:\\Python27\\python -m pip install -q --upgrade setuptools
+    WINEPREFIX=$prefix wine C:\\Python27\\python -m pip install -q pycparser==2.17
 done
 
 cat >$WINE32/python.sh <<EOF
@@ -95,7 +90,7 @@ unset WINEARCH
 export WINEPREFIX=$WINE32
 export LINK="/NXCOMPAT:NO /LTCG"
 export CL="/O1 /GL /GS-"
-exec wine C:\\\\Python27\\\\python.exe -OO "\$@"
+exec wine C:\\\\Python27\\\\python.exe "\$@"
 EOF
 chmod +x $WINE32/python.sh
 
@@ -120,7 +115,7 @@ unset WINEARCH
 export WINEPREFIX=$WINE64
 export LINK="/NXCOMPAT:NO /LTCG"
 export CL="/O1 /GL /GS-"
-exec wine C:\\\\Python27\\\\python.exe -OO "\$@"
+exec wine C:\\\\Python27\\\\python.exe "\$@"
 EOF
 chmod +x $WINE64/python.sh
 
