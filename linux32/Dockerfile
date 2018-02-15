@@ -154,8 +154,6 @@ RUN \
 
 RUN \
     cd /usr/lib/python2.7 && rm -rf test lib2to3 && \
-    find -name "*.py" | python -m compileall -qfi - && \
-    find -name "*.py" | python -OO -m compileall -qfi - && \
     find -name "*.so" | while read f; do strip $f; done && \
     rm -rf /usr/src && ldconfig && \
     apt-get clean
