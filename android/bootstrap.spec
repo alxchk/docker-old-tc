@@ -217,7 +217,7 @@ log_level = 2
 warn_on_root = 0
 
 # (str) Path to build artifact storage, absolute or relative to spec file
-# build_dir = ./.buildozer
+build_dir = /build/buildozer
 
 # (str) Path to build output (i.e. .apk, .ipa) storage
 # bin_dir = ./bin
