@@ -7,8 +7,7 @@ ENV \
     ZLIB_VER=1.2.11    \
     SQLITE_VER=3210000 \
     SQLITE_YEAR=2017   \
-    PYTHON_VER=2.7.14  \
-    XZ_VER=5.2.3
+    PYTHON_VER=2.7.14
 
 ADD compat /usr/include/
 RUN cat /usr/include/pthread-compat.h >>/usr/include/pthread.h
@@ -35,12 +34,6 @@ RUN \
     cd /usr/src/zlib-$ZLIB_VER && \
     ./configure --prefix=/usr --static && make && make install && \
     rm -rf /usr/src/zlib-$ZLIB_VER
-
-ADD downloads/xz-$XZ_VER.tar.gz /usr/src/
-RUN \
-    cd /usr/src/xz-$XZ_VER && \
-    ./configure --prefix=/usr && make && make install && \
-    rm -rf /usr/src/xz-$XZ_VER
 
 ADD downloads/pkg-config-0.29.1.tar.gz /usr/src/
 RUN \
@@ -84,8 +77,14 @@ RUN \
     ./configure --prefix=/usr \
       --without-doc-strings --without-tsc \
       --with-fpectl --with-ensurepip=install --with-signal-module \
-      --enable-ipv6 --enable-shared --enable-unicode=ucs4 && \
-    make && make install && rm -rf /usr/src/Python-$PYTHON_VER
+      --enable-ipv6 --enable-unicode=ucs4  CFLAGS="$CFLAGS -DXML_DEV_URANDOM" && \
+    make && make install && \
+    gcc --without-libgcc -shared -fPIC \
+        -o /usr/lib/libpython2.7.so \
+        -Wl,-whole-archive -Wl,-soname,libpython2.7.so.1.0 libpython2.7.a -Wl,--no-whole-archive \
+        -lutil -lz -lm -ldl -lcrypto -lssl -lpthread \
+        -Wl,-no-undefined && \
+    rm -rf /usr/src/Python-$PYTHON_VER
 
 ADD downloads/glib-2.32.4.tar.xz /usr/src/
 RUN \

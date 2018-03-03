@@ -5,14 +5,12 @@ ZLIB_VER=1.2.11
 SQLITE_VER=3210000
 SQLITE_YEAR=2017
 PYTHON_VER=2.7.14
-XZ_VER=5.2.3
 
 # VERSIONS /MAY/ BE UPDATED (In case of vulnerabilites)
 OPENSSL_SRC="https://www.openssl.org/source/openssl-$OPENSSL_VER.tar.gz"
 ZLIB_SRC="http://zlib.net/zlib-$ZLIB_VER.tar.gz"
 SQLITE_SRC="http://www.sqlite.org/$SQLITE_YEAR/sqlite-autoconf-$SQLITE_VER.tar.gz"
 PYTHON_SRC="https://www.python.org/ftp/python/$PYTHON_VER/Python-$PYTHON_VER.tgz"
-XZ_SRC="http://tukaani.org/xz/xz-$XZ_VER.tar.gz"
 
 # VERSIONS ARE ENOUGH
 LIBFFI_SRC="http://http.debian.net/debian/pool/main/libf/libffi/libffi_3.2.1.orig.tar.gz"
@@ -37,7 +35,7 @@ DOWNLOADS=`dirname "$SELF"`/downloads
 mkdir -p $DOWNLOADS
 cd $DOWNLOADS
 for bin in "$MAKE_SRC" "$OPENSSL_SRC" "$ZLIB_SRC" "$SQLITE_SRC" "$LIBFFI_SRC" \
-                       "$PYTHON_SRC" "$PKGCONFIG_SRC" "$GLIB_SRC" "$XZ_SRC"  \
+                       "$PYTHON_SRC" "$PKGCONFIG_SRC" "$GLIB_SRC" \
                        "$DBUS_SRC" "$DBUS_GLIB_SRC" "$GOBJECT_INTROSPECTION" \
                        "$PYGOBJECT" "$DBUS_PYTHON" "$M4_SRC" "$AUTOCONF_SRC" \
 		   "$AUTOMAKE_SRC" ; do
