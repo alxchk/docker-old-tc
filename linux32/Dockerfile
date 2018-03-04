@@ -72,6 +72,7 @@ RUN \
     rm -rf /usr/src/openssl-$OPENSSL_VER
 
 ADD downloads/Python-$PYTHON_VER.tgz /usr/src/
+ADD Setup.dist /usr/src/Python-$PYTHON_VER/Modules/Setup.dist
 RUN \
     cd /usr/src/Python-$PYTHON_VER && \
     ./configure --prefix=/usr \
