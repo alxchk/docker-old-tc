@@ -5,7 +5,7 @@ LABEL maintainer "alxchk@gmail.com"
 ENV \
     DEBIAN_FRONTEND=noninteractive \
     WINEDEBUG="-all" \
-    PYVER=2.7.14 \
+    PYVER=2.7.15 \
     BUILDENV=/build \
     WINE=${WINE:-wine} \
     WINE32="$BUILDENV/win32" \

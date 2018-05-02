@@ -2,11 +2,11 @@ FROM alxchk/linux64
 LABEL maintainer "alxchk@gmail.com"
 
 ENV \
-    OPENSSL_VER=1.0.2n \
+    OPENSSL_VER=1.0.2o \
     ZLIB_VER=1.2.11    \
-    SQLITE_VER=3210000 \
-    SQLITE_YEAR=2017   \
-    PYTHON_VER=2.7.14
+    SQLITE_VER=3230100 \
+    SQLITE_YEAR=2018   \
+    PYTHON_VER=2.7.15
 
 ENV \
     LC_ALL=C \

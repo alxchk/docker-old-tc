@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PYVER=2.7.14
+PYVER=2.7.15
 SELF=`readlink -f "$0"`
 DOWNLOADS=`dirname "$0"`/downloads
 
