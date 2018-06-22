@@ -4,7 +4,7 @@ LABEL maintainer "alxchk@gmail.com"
 ENV \
     OPENSSL_VER=1.0.2o \
     ZLIB_VER=1.2.11    \
-    SQLITE_VER=3230100 \
+    SQLITE_VER=3240000 \
     SQLITE_YEAR=2018   \
     PYTHON_VER=2.7.15
 
