@@ -12,7 +12,7 @@ ENV \
 RUN mkdir /build && dpkg --add-architecture i386 && \
 	mkdir -p /usr/share/man/man1/ && \
 	apt-get update && apt-get install  --no-install-recommends -y \
-	cython python-pip git openjdk-8-jdk build-essential ccache git \
+	cython python-pip git openjdk-8-jdk build-essential ccache git pkg-config \
 	libncurses5:i386 libstdc++6:i386 libgtk2.0-0:i386 libpangox-1.0-0:i386 \
 	libpangoxft-1.0-0:i386 libidn11:i386 python2.7 python2.7-dev \
 	openjdk-8-jdk unzip zlib1g-dev zlib1g:i386 python-setuptools \
