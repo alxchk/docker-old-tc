@@ -2,7 +2,7 @@ FROM alxchk/linux64
 LABEL maintainer "alxchk@gmail.com"
 
 ENV \
-    OPENSSL_VER=1.0.2o \
+    OPENSSL_VER=1.0.2p \
     ZLIB_VER=1.2.11    \
     SQLITE_VER=3240000 \
     SQLITE_YEAR=2018   \
@@ -11,12 +11,13 @@ ENV \
 ENV \
     LC_ALL=C \
     MAKEOPTS="-j2" \
-	TERM="" \
-	DEBIAN_FRONTEND=noninteractive \
-	CFLAGS="-Os -fPIC -pipe -L/opt/static" \
-	CXXFLAGS="-Os -fPIC -pipe" \
-	LDFLAGS="-s -O1 -fPIC -L/opt/static" \
-	PATH="/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:/"
+    TERM="" \
+    DEBIAN_FRONTEND=noninteractive \
+    CFLAGS="-Os -fPIC -pipe -L/opt/static" \
+    CXXFLAGS="-Os -fPIC -pipe" \
+    LDFLAGS="-s -O1 -fPIC -L/opt/static" \
+    PYTHON_ABI_MODE="shared" \
+    PATH="/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:/"
 
 ADD downloads/make-3.82.tar.gz /usr/src/
 RUN \
@@ -75,12 +76,12 @@ RUN \
       --without-doc-strings --without-tsc \
       --with-fpectl --with-ensurepip=install --with-signal-module \
       --enable-ipv6 --enable-unicode=ucs4 CFLAGS="$CFLAGS -DXML_DEV_URANDOM" && \
-    make && make install && \
+    make && make install && ( [ x"$PYTHON_ABI_MODE" = x"static" ] &&  \
     gcc --without-libgcc -pthread -shared -fPIC \
         -o /usr/lib/libpython2.7.so \
         -Wl,-whole-archive -Wl,-soname,libpython2.7.so.1.0 libpython2.7.a -Wl,--no-whole-archive \
         -lutil -lz -lm -ldl -lcrypto -lssl \
-        -Wl,-no-undefined && \
+        -Wl,-no-undefined ) && \
     rm -rf /usr/src/Python-$PYTHON_VER
 
 ADD downloads/glib-2.32.4.tar.xz /usr/src/
