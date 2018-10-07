@@ -80,12 +80,12 @@ RUN \
       --without-doc-strings --without-tsc \
       --with-fpectl --with-ensurepip=install --with-signal-module \
       --enable-ipv6 --enable-$PYTHON_ABI_MODE --enable-unicode=ucs4  CFLAGS="$CFLAGS -DXML_DEV_URANDOM" && \
-    make && make install && ( [ x"$PYTHON_ABI_MODE" = x"static" ] && \
+    make && make install && ( if [ x"$PYTHON_ABI_MODE" = x"static" ]; then \
     gcc --without-libgcc -shared -fPIC \
         -o /usr/lib/libpython2.7.so \
         -Wl,-whole-archive -Wl,-soname,libpython2.7.so.1.0 libpython2.7.a -Wl,--no-whole-archive \
         -lutil -lz -lm -ldl -lcrypto -lssl -lpthread \
-        -Wl,-no-undefined ) && \
+        -Wl,-no-undefined; fi ) && \
     rm -rf /usr/src/Python-$PYTHON_VER
 
 ADD downloads/glib-2.32.4.tar.xz /usr/src/
@@ -112,18 +112,19 @@ RUN \
 ADD downloads/dbus-python-0.84.0.tar.gz /usr/src/
 RUN \
     cd /usr/src/dbus-python-0.84.0 && ./configure --prefix=/usr && \
-    make && make install && rm -rf /usr/src/dbus-python-0.84.0
+    make LDFLAGS="$LDFLAGS -lpython2.7" && make install && rm -rf /usr/src/dbus-python-0.84.0
 
 ADD downloads/gobject-introspection-1.32.1.tar.xz /usr/src/
 RUN \
     cd /usr/src/gobject-introspection-1.32.1 && \
-    CFLAGS="$CFLAGS -D_GNU_SOURCE" \
+    CFLAGS="$CFLAGS -D_GNU_SOURCE" LDFLAGS="$LDFLAGS -lpython2.7"\
         ./configure --prefix=/usr --disable-tests && make && \
     make install && rm -rf /usr/src/gobject-introspection-1.32.1
 
 ADD downloads/pygobject-3.2.2.tar.xz /usr/src/
 RUN \
-    cd /usr/src/pygobject-3.2.2 && CFLAGS="$CFLAGS -D_GNU_SOURCE" ./configure --disable-glibtest \
+    cd /usr/src/pygobject-3.2.2 && CFLAGS="$CFLAGS -D_GNU_SOURCE" LDFLAGS="$LDFLAGS -lpython2.7" \
+	./configure --disable-glibtest \
 	--disable-cairo --prefix=/usr --enable-static && make -k ; \
     [ -f ./gi/_glib/.libs/libpyglib-gi-2.0-python.so.0.0.0 ] && \
     rm -f ./gi/_glib/.libs/libpyglib-gi-2.0-python.so{,.0,.0.0.0} && \
