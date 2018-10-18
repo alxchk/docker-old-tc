@@ -2,6 +2,7 @@
 
 OPENSSL_VER=1.0.2p
 ZLIB_VER=1.2.11
+BZIP_VER=1.0.6
 SQLITE_VER=3240000
 SQLITE_YEAR=2018
 PYTHON_VER=2.7.15
@@ -9,6 +10,7 @@ PYTHON_VER=2.7.15
 # VERSIONS /MAY/ BE UPDATED (In case of vulnerabilites)
 OPENSSL_SRC="https://www.openssl.org/source/openssl-$OPENSSL_VER.tar.gz"
 ZLIB_SRC="http://zlib.net/zlib-$ZLIB_VER.tar.gz"
+BZIP_SRC="http://http.debian.net/debian/pool/main/b/bzip2/bzip2_$BZIP_VER.orig.tar.bz2"
 SQLITE_SRC="http://www.sqlite.org/$SQLITE_YEAR/sqlite-autoconf-$SQLITE_VER.tar.gz"
 PYTHON_SRC="https://www.python.org/ftp/python/$PYTHON_VER/Python-$PYTHON_VER.tgz"
 
@@ -34,7 +36,7 @@ DOWNLOADS=`dirname "$SELF"`/downloads
 
 mkdir -p $DOWNLOADS
 cd $DOWNLOADS
-for bin in "$MAKE_SRC" "$OPENSSL_SRC" "$ZLIB_SRC" "$SQLITE_SRC" "$LIBFFI_SRC" \
+for bin in "$MAKE_SRC" "$OPENSSL_SRC" "$ZLIB_SRC" "$BZIP_SRC" "$SQLITE_SRC" "$LIBFFI_SRC" \
                        "$PYTHON_SRC" "$PKGCONFIG_SRC" "$GLIB_SRC" \
                        "$DBUS_SRC" "$DBUS_GLIB_SRC" "$GOBJECT_INTROSPECTION" \
                        "$PYGOBJECT" "$DBUS_PYTHON" "$M4_SRC" "$AUTOCONF_SRC" \

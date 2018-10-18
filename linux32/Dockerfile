@@ -5,6 +5,7 @@ LABEL maintainer "alxchk@gmail.com"
 ENV \
     OPENSSL_VER=1.0.2p \
     ZLIB_VER=1.2.11    \
+    BZIP_VER=1.0.6    \
     SQLITE_VER=3240000 \
     SQLITE_YEAR=2018   \
     PYTHON_VER=2.7.15
@@ -35,6 +36,12 @@ RUN \
     cd /usr/src/zlib-$ZLIB_VER && \
     ./configure --prefix=/usr --static && make && make install && \
     rm -rf /usr/src/zlib-$ZLIB_VER
+
+ADD downloads/bzip2_$BZIP_VER.orig.tar.bz2 /usr/src/
+RUN \
+    cd /usr/src/bzip2-$BZIP_VER && \
+    make CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" && make PREFIX=/usr install && \
+    rm -rf /usr/src/bzip2-$BZIP_VER
 
 ADD downloads/pkg-config-0.29.1.tar.gz /usr/src/
 RUN \
