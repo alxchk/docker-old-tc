@@ -18,5 +18,7 @@ int pthread_condattr_setclock(pthread_condattr_t *attr, clockid_t clock_id) {
         _pthread_condattr_setclock = -1;
         return -1;
     }
+
+    return _pthread_condattr_setclock(attr, clock_id);
 }
 #endif
