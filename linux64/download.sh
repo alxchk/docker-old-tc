@@ -15,6 +15,9 @@ SQLITE_SRC="http://www.sqlite.org/$SQLITE_YEAR/sqlite-autoconf-$SQLITE_VER.tar.g
 PYTHON_SRC="https://www.python.org/ftp/python/$PYTHON_VER/Python-$PYTHON_VER.tgz"
 
 # VERSIONS ARE ENOUGH
+LIBACL_SRC="http://download.savannah.gnu.org/releases/acl/acl-2.2.53.tar.gz"
+LIBCAP_SRC="https://mirrors.edge.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.25.tar.gz"
+LIBATTR_SRC="http://download.savannah.gnu.org/releases/attr/attr-2.4.48.tar.gz"
 LIBFFI_SRC="http://http.debian.net/debian/pool/main/libf/libffi/libffi_3.2.1.orig.tar.gz"
 PKGCONFIG_SRC="https://pkg-config.freedesktop.org/releases/pkg-config-0.29.1.tar.gz"
 M4_SRC="https://ftp.gnu.org/gnu/m4/m4-1.4.18.tar.gz"
@@ -37,8 +40,8 @@ DOWNLOADS=`dirname "$SELF"`/downloads
 mkdir -p $DOWNLOADS
 cd $DOWNLOADS
 for bin in "$MAKE_SRC" "$OPENSSL_SRC" "$ZLIB_SRC" "$BZIP_SRC" "$SQLITE_SRC" "$LIBFFI_SRC" \
-                       "$PYTHON_SRC" "$PKGCONFIG_SRC" "$GLIB_SRC" \
-                       "$DBUS_SRC" "$DBUS_GLIB_SRC" "$GOBJECT_INTROSPECTION" \
+                       "$PYTHON_SRC" "$PKGCONFIG_SRC" "$GLIB_SRC" "$LIBACL_SRC" "$LIBATTR_SRC" \
+                       "$LIBCAP_SRC" "$DBUS_SRC" "$DBUS_GLIB_SRC" "$GOBJECT_INTROSPECTION" \
                        "$PYGOBJECT" "$DBUS_PYTHON" "$M4_SRC" "$AUTOCONF_SRC" \
 		   "$AUTOMAKE_SRC" ; do
     wget -qc "$bin" || exit 1

@@ -79,6 +79,31 @@ RUN \
     ln -s /usr/lib/libcrypto.so /usr/lib/libcrypto.so.1 && \
     rm -rf /usr/src/openssl-$OPENSSL_VER
 
+ADD downloads/attr-2.4.48.tar.gz /usr/src
+RUN \
+    cd /usr/src/attr-2.4.48 && ./configure --prefix=/usr --enable-static \
+	--disable-shared && make && make install && rm -rf /usr/src/attr-2.4.48
+
+ADD downloads/acl-2.2.53.tar.gz /usr/src
+RUN \
+    cd /usr/src/acl-2.2.53 && ./configure --prefix=/usr --enable-static \
+	--disable-shared \
+	ac_cv_lib_attr_getxattr=yes \
+	&& make && make install && rm -rf /usr/src/acl-2.2.53
+
+ADD downloads/libcap-2.25.tar.gz /usr/src
+RUN \
+    cd /usr/src/libcap-2.25 && \
+        sed -e 's@__le32@__u32@g;' libcap/include/uapi/linux/capability.h > \
+	    libcap/include/uapi/linux/capability.h_ && \
+	    rm -f libcap/include/uapi/linux/capability.h && \
+	    mv libcap/include/uapi/linux/capability.h_ \
+	       libcap/include/uapi/linux/capability.h && \
+	make CFLAGS="$CFLAGS -D__u32=uint32_t -D__le32=uint32_t" -C libcap && \
+	make -C libcap INCDIR=/usr/include LIBDIR=/usr/lib \
+	install && cp -r libcap/include/uapi/linux/ /usr/include/ && \
+	rm -rf /usr/src/libcap-2.25
+
 ADD downloads/Python-$PYTHON_VER.tgz /usr/src/
 ADD Setup.dist /usr/src/Python-$PYTHON_VER/Modules/Setup.dist
 RUN \

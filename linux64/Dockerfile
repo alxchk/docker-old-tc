@@ -20,6 +20,8 @@ ENV \
     PYTHON_ABI_MODE="shared" \
     PATH="/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:/"
 
+ADD compat /usr/include/
+
 ADD downloads/make-3.82.tar.gz /usr/src/
 RUN \
     cd /usr/src/make-3.82 && \
@@ -74,6 +76,27 @@ RUN \
     ln -s /usr/lib/libssl.so /usr/lib/libssl.so.1 && \
     ln -s /usr/lib/libcrypto.so /usr/lib/libcrypto.so.1 && \
     rm -rf /usr/src/openssl-$OPENSSL_VER
+
+ADD downloads/attr-2.4.48.tar.gz /usr/src
+RUN \
+    cd /usr/src/attr-2.4.48 && ./configure --prefix=/usr --enable-static \
+	--disable-shared && sed -i include/attributes.h -e 's@__attribute__@;//__attribute__@g' && \
+	make && make install && rm -rf /usr/src/attr-2.4.48
+
+ADD downloads/acl-2.2.53.tar.gz /usr/src
+RUN \
+    cd /usr/src/acl-2.2.53 && ./configure --prefix=/usr --enable-static \
+	--disable-shared \
+	ac_cv_lib_attr_getxattr=yes \
+	&& make && make install && rm -rf /usr/src/acl-2.2.53
+
+ADD downloads/libcap-2.25.tar.gz /usr/src
+RUN \
+    cd /usr/src/libcap-2.25 && \
+	make CFLAGS="$CFLAGS -D__u32=uint32_t -D__le32=uint32_t" -C libcap && \
+	make -C libcap INCDIR=/usr/include LIBDIR=/usr/lib \
+	install && cp -r libcap/include/uapi/linux/ /usr/include/ && \
+	rm -rf /usr/src/libcap-2.25
 
 ADD downloads/Python-$PYTHON_VER.tgz /usr/src/
 ADD Setup.dist /usr/src/Python-$PYTHON_VER/Modules/Setup.dist
