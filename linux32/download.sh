@@ -23,6 +23,7 @@ PKGCONFIG_SRC="https://pkg-config.freedesktop.org/releases/pkg-config-0.29.1.tar
 M4_SRC="https://ftp.gnu.org/gnu/m4/m4-1.4.18.tar.gz"
 AUTOCONF_SRC="https://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.gz"
 AUTOMAKE_SRC="https://ftp.gnu.org/gnu/automake/automake-1.15.tar.gz"
+LIBALSA_SRC="http://www.mirrorservice.org/sites/ftp.alsa-project.org/pub/lib/alsa-lib-1.0.15.tar.bz2"
 PORTAUDIO_SRC="http://www.portaudio.com/archives/pa_stable_v190600_20161030.tgz"
 OPUS_SRC="https://archive.mozilla.org/pub/opus/opus-1.3.tar.gz"
 
@@ -45,6 +46,6 @@ for bin in "$MAKE_SRC" "$OPENSSL_SRC" "$ZLIB_SRC" "$BZIP_SRC" "$SQLITE_SRC" "$LI
                        "$PYTHON_SRC" "$PKGCONFIG_SRC" "$GLIB_SRC" "$LIBACL_SRC" "$LIBATTR_SRC" \
                        "$LIBCAP_SRC" "$DBUS_SRC" "$DBUS_GLIB_SRC" "$GOBJECT_INTROSPECTION" \
                        "$PYGOBJECT" "$DBUS_PYTHON" "$M4_SRC" "$AUTOCONF_SRC" \
-		       "$PORTAUDIO_SRC" "$OPUS_SRC" "$AUTOMAKE_SRC" ; do
+		       "$PORTAUDIO_SRC" "$OPUS_SRC" "$LIBALSA_SRC" "$AUTOMAKE_SRC" ; do
     wget -qc "$bin" || exit 1
 done

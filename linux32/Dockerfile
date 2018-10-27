@@ -183,6 +183,13 @@ RUN \
     cd /usr/src/automake-1.15 && ./configure --prefix=/usr && \
     make && make install && rm -rf /usr/src/automake-1.15
 
+ADD downloads/alsa-lib-1.0.15.tar.bz2 /usr/src
+RUN \
+   cd /usr/src/alsa-lib-1.0.15/ && \
+	./configure --prefix=/usr --with-versioned --enable-shared \
+	--disable-static && make && make install && \
+	rm -rf /usr/src/alsa-lib-1.0.15
+
 ADD downloads/pa_stable_v190600_20161030.tgz /usr/src
 RUN \
     cd /usr/src/portaudio && ./configure --prefix=/usr \
