@@ -177,6 +177,20 @@ RUN \
     cd /usr/src/automake-1.15 && ./configure --prefix=/usr && \
     make && make install && rm -rf /usr/src/automake-1.15
 
+
+ADD downloads/pa_stable_v190600_20161030.tgz /usr/src
+RUN \
+    cd /usr/src/portaudio && ./configure --prefix=/usr \
+	--with-alsa --with-pic --enable-static --disable-shared && \
+	make && make install && rm -rf /usr/src/portaudio
+
+ADD downloads/opus-1.3.tar.gz /usr/src
+RUN \
+   cd /usr/src/opus-1.3 && ./configure --prefix=/usr \
+	--enable-static --disable-shared --disable-intrinsics \
+	--disable-rtcd && make && make install && \
+   rm -rf /usr/src/opus-1.3
+
 RUN \
     rm -rf /usr/share/locale /usr/share/man /usr/share/info
 

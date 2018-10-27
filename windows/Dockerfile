@@ -19,7 +19,7 @@ RUN dpkg --add-architecture i386 && apt-get update && apt-get upgrade -y && \
     mingw-w64 g++-mingw-w64-x86-64 g++-mingw-w64-i686 \
     debootstrap python python-pip git make wine wine64 wine32 xvfb \
     python-setuptools-git build-essential python-dev python-wheel \
-    xauth xxd zip unzip && apt-get clean
+    xauth xxd zip unzip automake && apt-get clean
 
 RUN \
     mkdir -p \
@@ -27,6 +27,18 @@ RUN \
           /build/win32 \
           /build/win64 \
           /build/bootstrap
+
+ADD downloads/opus-1.3.tar.gz /usr/src
+RUN \
+   cd /usr/src/opus-1.3 && \
+	./configure --prefix=/usr/x86_64-w64-mingw32 \
+	--enable-static --disable-shared \
+        --host=x86_64-w64-mingw32 && make && make install && \
+	make distclean && \
+	./configure --prefix=/usr/i686-w64-mingw32 \
+	--enable-static --enable-shared \
+        --host=i686-w64-mingw32 && make && make install && \
+	rm -rf /usr/src/opus-1.3
 
 COPY windows.sh /build/bootstrap/
 
@@ -40,7 +52,8 @@ RUN yes | pip install pylzma
 RUN /usr/bin/xvfb-run /build/bootstrap/windows.sh
 
 RUN apt-get remove python-pip python-setuptools-git \
-    build-essential python-dev python-wheel; apt-get clean; apt-get autoremove; \
+	build-essential python-dev python-wheel automake; \
+	apt-get clean; apt-get autoremove; \
     rm -rf /build/bootstrap /build/downloads
 
 FROM scratch
