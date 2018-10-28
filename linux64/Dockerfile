@@ -186,9 +186,8 @@ RUN \
 
 ADD downloads/opus-1.3.tar.gz /usr/src
 RUN \
-   cd /usr/src/opus-1.3 && ./configure --prefix=/usr \
-	--enable-static --disable-shared --disable-intrinsics \
-	--disable-rtcd && make && make install && \
+   cd /usr/src/opus-1.3 && ./configure --enable-fixed-point --prefix=/usr \
+	--enable-static --disable-shared && make && make install && \
    rm -rf /usr/src/opus-1.3
 
 RUN \
