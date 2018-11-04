@@ -14,8 +14,8 @@ ENV \
     MAKEOPTS="-j2" \
     TERM="" \
     DEBIAN_FRONTEND=noninteractive \
-    CFLAGS="-Os -fPIC -pipe -L/opt/static" \
-    CXXFLAGS="-Os -fPIC -pipe" \
+    CFLAGS="-Os -DNDEBUG -fPIC -pipe -L/opt/static" \
+    CXXFLAGS="-Os -DNDEBUG -fPIC -pipe" \
     LDFLAGS="-s -O1 -fPIC -L/opt/static" \
     PYTHON_ABI_MODE="shared" \
     PATH="/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:/"
@@ -205,8 +205,8 @@ FROM scratch
 COPY --from=0 / /
 
 ENV \
-    CFLAGS="-Os -fPIC -pipe -L/opt/static" \
-    CXXFLAGS="-Os -fPIC -pipe" \
+    CFLAGS="-Os -DNDEBUG -fPIC -pipe -L/opt/static" \
+    CXXFLAGS="-Os -DNDEBUG -fPIC -pipe" \
     LDFLAGS="-s -O1 -fPIC -L/opt/static" \
     LC_ALL=C \
     TERM= \

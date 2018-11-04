@@ -14,8 +14,8 @@ ADD compat /usr/include/
 RUN cat /usr/include/pthread-compat.h >>/usr/include/pthread.h
 
 ENV \
-    CFLAGS="-Os -fPIC -pipe -L/opt/static" \
-    CXXFLAGS="-Os -fPIC -pipe" \
+    CFLAGS="-Os -DNDEBUG -fPIC -pipe -L/opt/static" \
+    CXXFLAGS="-Os -DNDEBUG -fPIC -pipe" \
     LDFLAGS="-s -O1 -fPIC -L/opt/static" \
     MAKEOPTS="-j 2" \
     LC_ALL=C \
@@ -218,8 +218,8 @@ FROM scratch
 COPY --from=0 / /
 
 ENV \
-    CFLAGS="-Os -fPIC -pipe -L/opt/static" \
-    CXXFLAGS="-Os -fPIC -pipe" \
+    CFLAGS="-Os -DNDEBUG -fPIC -pipe -L/opt/static" \
+    CXXFLAGS="-Os -DNDEBUG -fPIC -pipe" \
     LDFLAGS="-s -O1 -fPIC -L/opt/static" \
     LC_ALL=C \
     TERM= \
