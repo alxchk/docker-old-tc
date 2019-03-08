@@ -1,11 +1,11 @@
 #!/bin/bash
 
-OPENSSL_VER=1.0.2p
+OPENSSL_VER=1.0.2r
 ZLIB_VER=1.2.11
 BZIP_VER=1.0.6
 SQLITE_VER=3240000
 SQLITE_YEAR=2018
-PYTHON_VER=2.7.15
+PYTHON_VER=2.7.16
 
 # VERSIONS /MAY/ BE UPDATED (In case of vulnerabilites)
 OPENSSL_SRC="https://www.openssl.org/source/openssl-$OPENSSL_VER.tar.gz"

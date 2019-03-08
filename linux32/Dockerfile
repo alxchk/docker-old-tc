@@ -3,12 +3,12 @@ FROM alxchk/linux32
 LABEL maintainer "alxchk@gmail.com"
 
 ENV \
-    OPENSSL_VER=1.0.2p \
+    OPENSSL_VER=1.0.2r \
     ZLIB_VER=1.2.11    \
     BZIP_VER=1.0.6    \
     SQLITE_VER=3240000 \
     SQLITE_YEAR=2018   \
-    PYTHON_VER=2.7.15
+    PYTHON_VER=2.7.16
 
 ADD compat /usr/include/
 RUN cat /usr/include/pthread-compat.h >>/usr/include/pthread.h
@@ -66,7 +66,7 @@ ADD downloads/openssl-$OPENSSL_VER.tar.gz /usr/src/
 RUN \
     cd /usr/src/openssl-$OPENSSL_VER/ && \
     CC="gcc -Os -fPIC" ./Configure --prefix=/usr no-hw-xxx shared \
-        no-dso no-err no-krb5 no-hw no-asm no-ssl2 linux-generic32 && \
+        no-dso no-err no-krb5 no-hw no-ssl2 enable-weak-ssl-ciphers linux-generic32 && \
     make depend >/dev/null 2>/dev/null && \
     make && make install ; \
     cp libssl.so.1.0.0 /usr/lib/libssl.so && \
