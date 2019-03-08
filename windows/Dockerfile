@@ -5,12 +5,13 @@ LABEL maintainer "alxchk@gmail.com"
 ENV \
     DEBIAN_FRONTEND=noninteractive \
     WINEDEBUG="-all" \
-    PYVER=2.7.15 \
+    OPENSSL_VER=1.0.2r \
     BUILDENV=/build \
     WINE=${WINE:-wine} \
-    WINE32="$BUILDENV/win32" \
-    WINE64="$BUILDENV/win64" \
-    DOWNLOADS="$BUILDENV/downloads" \
+    WINE32="/build/win32" \
+    WINE64="/build/win64" \
+    DOWNLOADS="/build/downloads" \
+    RC="/build/rc-with-includes" \
     MINGW64=x86_64-w64-mingw32-g++ \
     MINGW32=i686-w64-mingw32-g++
 
@@ -21,31 +22,67 @@ RUN dpkg --add-architecture i386 && apt-get update && apt-get upgrade -y && \
     python-setuptools-git build-essential python-dev python-wheel \
     xauth xxd zip unzip automake && apt-get clean
 
-RUN \
-    mkdir -p \
-          /build/downloads \
-          /build/win32 \
-          /build/win64 \
-          /build/bootstrap
-
-COPY windows.sh /build/bootstrap/
-
-RUN \
-    mkdir -p /build/workspace/project && \
-    chmod +x /build/bootstrap/windows.sh
-
-COPY downloads/* /build/downloads/
+RUN mkdir -p $BUILDENV/workspace/project
 RUN yes | pip install pylzma
 
-RUN /usr/bin/xvfb-run /build/bootstrap/windows.sh
+COPY rc-with-includes $BUILDENV/rc-with-includes
+COPY downloads $BUILDENV/downloads
 
-RUN apt-get remove python-pip python-setuptools-git \
-	build-essential python-dev python-wheel automake; \
-	apt-get clean; apt-get autoremove; \
-    rm -rf /build/bootstrap /build/downloads
+COPY windows.sh $BUILDENV/
 
-FROM scratch
-COPY --from=0 / /
+RUN \
+	chmod +x /build/windows.sh && \
+	/usr/bin/xvfb-run /build/windows.sh
+
+RUN \
+	cd $WINE32/drive_c/ && tar zxf $DOWNLOADS/openssl-$OPENSSL_VER.tar.gz && \
+	mv openssl-$OPENSSL_VER openssl && cd $WINE32/drive_c/openssl && \
+	WINEPREFIX=$WINE32 wine perl Configure VC-WIN32 --prefix=C:\\openssl-build \
+         	no-comp no-srp enable-weak-ssl-ciphers && \
+	WINEPREFIX=$WINE32 wine cmd /c ms\\do_ms.bat && \
+	WINEPREFIX=$WINE32 wine cmd /c ms\\do_nasm.bat && \
+	sed -i -e 's@/Zi@@g;s@/debug@@g' ms/nt.mak && \
+	$WINE32/nmake.sh -f ms\\nt.mak && \
+	$WINE32/nmake.sh -f ms\\nt.mak install && \
+        rm -rf $WINE32/drive_c/openssl
+
+RUN \
+	cd $WINE32/drive_c/ && tar zxf $DOWNLOADS/openssl-$OPENSSL_VER.tar.gz && \
+	mv openssl-$OPENSSL_VER openssl && cd $WINE32/drive_c/openssl && \
+	WINEPREFIX=$WINE64 wine perl Configure VC-WIN64A --prefix=C:\\openssl-build \
+         	no-comp no-srp enable-weak-ssl-ciphers && \
+	WINEPREFIX=$WINE64 WINEPATH="C:\\nasm" wine cmd /c ms\\do_win64a.bat && \
+	sed -i -e 's@/Zi@@g;s@/debug@@g' ms/nt.mak && \
+	$WINE64/nmake.sh -f ms\\nt.mak && \
+	$WINE64/nmake.sh -f ms\\nt.mak install && \
+        rm -rf $WINE64/drive_c/openssl
+
+RUN \
+        for dir in $WINE32 $WINE64; do \
+	ln -s $dir/drive_c/openssl-build/include/openssl \
+	$dir/drive_c/Python27/include && \
+        ln -s $dir/drive_c/openssl-build/lib/ssleay32.lib $dir/drive_c/Python27/libs/libssl.lib && \
+	ln -s $dir/drive_c/openssl-build/lib/libeay32.lib $dir/drive_c/Python27/libs/libcrypto.lib; \
+        done
+
+COPY patches /build/patches
+
+RUN \
+	for dir in $WINE32 $WINE64; do \
+	cd $dir/drive_c; patch --binary -p0 -i /build/patches/distutils.patch; done; \
+	rm -rf /build/patches; \
+	cp -vf $DOWNLOADS/stdint.h \
+	"$WINE32/drive_c/Program Files/Common Files/Microsoft/Visual C++ for Python/9.0/VC/include/"; \
+	cp -vf $DOWNLOADS/stdint.h \
+	"$WINE64/drive_c/Program Files (x86)/Common Files/Microsoft/Visual C++ for Python/9.0/VC/include/"
+
+RUN apt-get remove -y python-pip python-setuptools-git \
+	build-essential python-dev python-wheel automake && \
+	apt-get autoremove -y && apt-get clean && \
+	rm -rf $DOWNLOADS $DOWNLOADS/windows.sh
+
+# FROM scratch
+# COPY --from=0 / /
 
 ENV \
     WINE32=/build/win32 \

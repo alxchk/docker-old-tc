@@ -13,6 +13,10 @@ WINE=${WINE:-wine}
 WINE32="$BUILDENV/win32"
 WINE64="$BUILDENV/win64"
 DOWNLOADS="$BUILDENV/downloads"
+RC="$BUILDENV/rc-with-includes"
+PYTHON_VER=2.7.16
+OPENSSL_VER="1.0.2r"
+NASM_VER="2.14.02"
 
 MINGW64=${MINGW64:-x86_64-w64-mingw32-g++}
 MINGW32=${MINGW32:-i686-w64-mingw32-g++}
@@ -20,7 +24,6 @@ MINGW32=${MINGW32:-i686-w64-mingw32-g++}
 exec < /dev/null
 
 mkdir -p "$BUILDENV"
-mkdir -p "$DOWNLOADS"
 
 WINEARCH=win32 WINEPREFIX=$WINE32 wineboot
 WINEARCH=win64 WINEPREFIX=$WINE64 wineboot
@@ -28,29 +31,28 @@ WINEARCH=win64 WINEPREFIX=$WINE64 wineboot
 for prefix in $WINE32 $WINE64; do
     rm -f $prefix/dosdevices/y:
     ln -sf $DOWNLOADS $prefix/dosdevices/y:
+    rm -f $prefix/dosdevices/x:
+    ln -sf $RC $prefix/dosdevices/x:
 done
 
 WINEPREFIX=$WINE32 wineserver -k || true
 
-[ ! -f $WINE32/drive_c/.python ] && \
-    WINEPREFIX=$WINE32 msiexec /i Y:\\python-$PYVER.msi /q && \
-    touch $WINE32/drive_c/.python
+WINEPREFIX=$WINE32 msiexec /i Y:\\python-$PYTHON_VER.msi /q
+WINEPREFIX=$WINE64 msiexec /i Y:\\python-$PYTHON_VER.amd64.msi /q
 
-WINEPREFIX=$WINE32 wineboot -r
-WINEPREFIX=$WINE32 wineserver -k  || true
-
-[ ! -f $WINE64/drive_c/.python ] && \
-    WINEPREFIX=$WINE64 msiexec /i Y:\\python-$PYVER.amd64.msi /q && \
-    touch $WINE64/drive_c/.python
-
-WINEPREFIX=$WINE64 wineboot -r
-WINEPREFIX=$WINE64 wineserver -k || true
+WINEPREFIX=$WINE32 msiexec /i Y:\\strawberry-perl-5.28.1.1-32bit.msi /q
+WINEPREFIX=$WINE64 msiexec /i Y:\\strawberry-perl-5.28.1.1-64bit.msi /q
 
 for prefix in $WINE32 $WINE64; do
-    [ ! -f $prefix/drive_c/.vc ] && \
-	WINEPREFIX=$prefix msiexec /i Y:\\VCForPython27.msi /q && \
-	touch $prefix/drive_c/.vc
+    WINEPREFIX=$prefix msiexec /i Y:\\VCForPython27.msi /q
+    WINEPREFIX=$prefix wineboot -r
+    WINEPREFIX=$prefix wineserver -k
+
+    rm -rf $prefix/drive_c/Strawberry/c
 done
+
+cd $WINE32/drive_c && unzip $DOWNLOADS/nasm-${NASM_VER}-win32.zip && mv nasm-${NASM_VER} nasm
+cd $WINE64/drive_c && unzip $DOWNLOADS/nasm-${NASM_VER}-win64.zip && mv nasm-${NASM_VER} nasm
 
 WINEPREFIX=$WINE32 sh $DOWNLOADS/winetricks winxp
 WINEPREFIX=$WINE64 sh $DOWNLOADS/winetricks win7
@@ -109,6 +111,22 @@ exec wine "\$VCINSTALLDIR\\\\bin\\\\cl.exe" "\$@"
 EOF
 chmod +x $WINE32/cl.sh
 
+cat >$WINE32/nmake.sh <<EOF
+#!/bin/sh
+unset WINEARCH
+export WINEPREFIX=$WINE32
+export VCINSTALLDIR="C:\\\\Program Files\\\\Common Files\\\\Microsoft\\\\Visual C++ for Python\\\\9.0\\\\VC"
+export WindowsSdkDir="C:\\\\Program Files\\\\Common Files\\\\Microsoft\\\\Visual C++ for Python\\\\9.0\\\\WinSDK"
+export INCLUDE="\$VCINSTALLDIR\\\\Include;\$WindowsSdkDir\\\\Include"
+export LIB="\$VCINSTALLDIR\\\\Lib;\$WindowsSdkDir\\\\Lib"
+export LIBPATH="\$VCINSTALLDIR\\\\Lib;\$WindowsSdkDir\\\\Lib"
+export LINK="/NXCOMPAT:NO /LTCG"
+export CL="/GL /GS-"
+export WINEPATH="C:\\\\Windows;C:\\\\nasm;\$VCINSTALLDIR\\\\bin;X:\\\\"
+exec wine "\$VCINSTALLDIR\\\\bin\\\\nmake.exe" "\$@"
+EOF
+chmod +x $WINE32/nmake.sh
+
 cat >$WINE64/python.sh <<EOF
 #!/bin/sh
 unset WINEARCH
@@ -133,3 +151,19 @@ export CL="/GL /GS-"
 exec wine "\$VCINSTALLDIR\\\\bin\\\\amd64\\\\cl.exe" "\$@"
 EOF
 chmod +x $WINE64/cl.sh
+
+cat >$WINE64/nmake.sh <<EOF
+#!/bin/sh
+unset WINEARCH
+export WINEPREFIX=$WINE64
+export VCINSTALLDIR="C:\\\\Program Files (x86)\\\\Common Files\\\\Microsoft\\\\Visual C++ for Python\\\\9.0\\\\VC"
+export WindowsSdkDir="C:\\\\Program Files (x86)\\\\Common Files\\\\Microsoft\\\\Visual C++ for Python\\\\9.0\\\\WinSDK"
+export INCLUDE="\$VCINSTALLDIR\\\\Include;\$WindowsSdkDir\\\\Include"
+export LIB="\$VCINSTALLDIR\\\\Lib\\\\amd64;\$WindowsSdkDir\\\\Lib\\\\x64"
+export LIBPATH="\$VCINSTALLDIR\\\\Lib\\\\amd64;\$WindowsSdkDir\\\\Lib\\\\x64"
+export LINK="/NXCOMPAT:NO /LTCG"
+export CL="/GL /GS-"
+export WINEPATH="C:\\\\Windows;C:\\\\nasm;\$VCINSTALLDIR\\\\bin\\\\amd64;\$VCINSTALLDIR\\\\bin;X:\\\\"
+exec wine "\$VCINSTALLDIR\\\\bin\\\\amd64\\\\nmake.exe" "\$@"
+EOF
+chmod +x $WINE64/nmake.sh

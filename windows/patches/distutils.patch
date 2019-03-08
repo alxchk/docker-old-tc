@@ -1,0 +1,10 @@
+--- Python27/Lib/distutils/dep_util.py.bak	2019-03-08 07:39:14.052718198 +0000
++++ Python27/Lib/distutils/dep_util.py	2019-03-08 07:39:28.099215563 +0000
+@@ -49,6 +49,6 @@
+ 
+     return n_sources, n_targets
+ 
+-def newer_group(sources, target, missing='error'):
++def newer_group(sources, target, missing='newer'):
+     """Return true if 'target' is out-of-date with respect to any file
+     listed in 'sources'.

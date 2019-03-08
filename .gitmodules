@@ -1,0 +1,3 @@
+[submodule "windows/rc-with-includes"]
+	path = windows/rc-with-includes
+	url = https://github.com/eladkarako/rc-with-includes
