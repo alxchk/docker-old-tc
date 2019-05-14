@@ -19,7 +19,12 @@
 #ifndef	_SCHED_H
 #define	_SCHED_H	1
 
+#define GNU_SOURCE
+#include <stdarg.h>
+#include <syscall.h>
 #include <features.h>
+#include <limits.h>
+#include <string.h>
 
 /* Get type definitions.  */
 #include <bits/types.h>
@@ -116,25 +121,25 @@ extern int sched_rr_get_interval (__pid_t __pid, struct timespec *__t) __THROW;
 #define __NR_sched_setaffinity		203
 #define __NR_sched_getaffinity		204
 
-#include <sys/syscall.h>
-#include <limits.h>
-
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 
 static inline
 int sched_setaffinity (pid_t pid, size_t cpusetsize, const cpu_set_t *cpuset)
 {
+    long syscall(long number, ...);
     return syscall(__NR_sched_setaffinity, 3, pid, cpusetsize, cpuset);
 }
 
 static inline
 int sched_getaffinity (pid_t pid, size_t cpusetsize, const cpu_set_t *cpuset)
 {
+    long syscall(long number, ...);
     int res = syscall(__NR_sched_getaffinity, pid, MIN(INT_MAX, cpusetsize), cpuset);
     if (res != -1) {
         memset ((char *) cpuset + res, '\0', cpusetsize - res);
         res = 0;
     }
+
     return res;
 }
 

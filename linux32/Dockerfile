@@ -2,14 +2,6 @@ FROM alxchk/linux32
 
 LABEL maintainer "alxchk@gmail.com"
 
-ENV \
-    OPENSSL_VER=1.0.2r \
-    ZLIB_VER=1.2.11    \
-    BZIP_VER=1.0.6    \
-    SQLITE_VER=3240000 \
-    SQLITE_YEAR=2018   \
-    PYTHON_VER=2.7.16
-
 ADD compat /usr/include/
 RUN cat /usr/include/pthread-compat.h >>/usr/include/pthread.h
 
@@ -31,12 +23,14 @@ RUN \
     apt-get --force-yes -y remove make << /dev/null && \
     rm -rf /usr/src/make-3.82
 
+ENV ZLIB_VER=1.2.11
 ADD downloads/zlib-$ZLIB_VER.tar.gz /usr/src/
 RUN \
     cd /usr/src/zlib-$ZLIB_VER && \
     ./configure --prefix=/usr --static && make && make install && \
     rm -rf /usr/src/zlib-$ZLIB_VER
 
+ENV BZIP_VER=1.0.6
 ADD downloads/bzip2_$BZIP_VER.orig.tar.bz2 /usr/src/
 RUN \
     cd /usr/src/bzip2-$BZIP_VER && \
@@ -55,6 +49,7 @@ RUN \
     ./configure --enable-static --prefix=/usr && \
     make install && rm -rf /usr/src/libffi-3.2.1
 
+ENV SQLITE_VER=3280000
 ADD downloads/sqlite-autoconf-$SQLITE_VER.tar.gz /usr/src/
 RUN \
     cd /usr/src/sqlite-autoconf-$SQLITE_VER && \
@@ -62,6 +57,7 @@ RUN \
 	--disable-dynamic-extensions && \
     make && make install && rm -rf /usr/src/sqlite-autoconf-$SQLITE_VER
 
+ENV OPENSSL_VER=1.0.2r
 ADD downloads/openssl-$OPENSSL_VER.tar.gz /usr/src/
 RUN \
     cd /usr/src/openssl-$OPENSSL_VER/ && \
@@ -104,6 +100,7 @@ RUN \
 	install && cp -r libcap/include/uapi/linux/ /usr/include/ && \
 	rm -rf /usr/src/libcap-2.25
 
+ENV PYTHON_VER=2.7.16
 ADD downloads/Python-$PYTHON_VER.tgz /usr/src/
 ADD Setup.dist /usr/src/Python-$PYTHON_VER/Modules/Setup.dist
 RUN \
@@ -182,6 +179,21 @@ ADD downloads/automake-1.15.tar.gz /usr/src/
 RUN \
     cd /usr/src/automake-1.15 && ./configure --prefix=/usr && \
     make && make install && rm -rf /usr/src/automake-1.15
+
+ENV KRB5_VER=1.17-final
+ADD downloads/krb5-$KRB5_VER.tar.gz /usr/src
+RUN \
+    cd /usr/src/krb5-krb5-$KRB5_VER/src && \
+    autoreconf -i && CFLAGS="$CFLAGS -DAI_NUMERICSERV=0x0400" ./configure --prefix=/usr \
+	--without-readline --without-libedit --without-lmdb --without-keyutils --with-crypto-impl=openssl \
+	--without-ldap --without-hesiod --with-size-optimizations --disable-nls --disable-rpath \
+	--disable-aesni --disable-pkinit --enable-dns-for-realm --enable-static --disable-shared \
+	--without-vague-errors --disable-pkinit --disable-athena --with-spake-openssl && \
+	make && make install
+RUN \
+    sed -i /usr/bin/krb5-config -e \
+	's@echo $lib_flags@echo "-Wl,-no-undefined -Wl,--start-group $lib_flags -lkrb5support -Wl,--end-group \
+	$GEN_LIB $LIBS $DL_LIB"@g'
 
 ADD downloads/alsa-lib-1.0.15.tar.bz2 /usr/src
 RUN \

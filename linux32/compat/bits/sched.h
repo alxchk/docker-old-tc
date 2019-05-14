@@ -23,7 +23,6 @@
 # error "Never include <bits/sched.h> directly; use <sched.h> instead."
 #endif
 
-
 /* Scheduling algorithms.  */
 #define SCHED_OTHER		0
 #define SCHED_FIFO		1
@@ -206,6 +205,7 @@ __BEGIN_DECLS
 
 static inline 
 cpu_set_t * __sched_cpualloc (size_t count) {
+    void *malloc(size_t size);
     return malloc (__CPU_ALLOC_SIZE (count));
 }
 
@@ -250,6 +250,7 @@ int __sched_cpucount (size_t setsize, const cpu_set_t *setp)
 
 static inline
 void __sched_cpufree (cpu_set_t *__set) {
+    void free(void *);
     free(__set);
 }
 
