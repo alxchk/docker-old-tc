@@ -191,9 +191,11 @@ RUN \
 	--without-vague-errors --disable-pkinit --disable-athena --with-spake-openssl && \
 	make && make install
 RUN \
-    sed -i /usr/bin/krb5-config -e \
+    cp /usr/bin/krb5-config /usr/bin/krb5-config.bak && \
+    sed /usr/bin/krb5-config -e \
 	's@echo $lib_flags@echo "-Wl,-no-undefined -Wl,--start-group $lib_flags -lkrb5support -Wl,--end-group \
-	$GEN_LIB $LIBS $DL_LIB"@g'
+	$GEN_LIB $LIBS $DL_LIB"@g' < /usr/bin/krb5-config.bak > /usr/bin/krb5-config && \
+    rm /usr/bin/krb5-config.bak
 
 ADD downloads/alsa-lib-1.0.15.tar.bz2 /usr/src
 RUN \
