@@ -5,7 +5,7 @@ LABEL maintainer "alxchk@gmail.com"
 ENV \
     DEBIAN_FRONTEND=noninteractive \
     WINEDEBUG="-all" \
-    OPENSSL_VER=1.0.2r \
+    OPENSSL_VER=1.0.2t \
     BUILDENV=/build \
     WINE=${WINE:-wine} \
     WINE32="/build/win32" \

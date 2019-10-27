@@ -49,7 +49,7 @@ RUN \
     ./configure --enable-static --prefix=/usr && \
     make install && rm -rf /usr/src/libffi-3.2.1
 
-ENV SQLITE_VER=3280000
+ENV SQLITE_VER=3300100
 ADD downloads/sqlite-autoconf-$SQLITE_VER.tar.gz /usr/src/
 RUN \
     cd /usr/src/sqlite-autoconf-$SQLITE_VER && \
@@ -57,7 +57,7 @@ RUN \
 	--disable-dynamic-extensions && \
     make && make install && rm -rf /usr/src/sqlite-autoconf-$SQLITE_VER
 
-ENV OPENSSL_VER=1.0.2r
+ENV OPENSSL_VER=1.0.2t
 ADD downloads/openssl-$OPENSSL_VER.tar.gz /usr/src/
 RUN \
     cd /usr/src/openssl-$OPENSSL_VER/ && \
@@ -100,7 +100,7 @@ RUN \
 	install && cp -r libcap/include/uapi/linux/ /usr/include/ && \
 	rm -rf /usr/src/libcap-2.25
 
-ENV PYTHON_VER=2.7.16
+ENV PYTHON_VER=2.7.17
 ADD downloads/Python-$PYTHON_VER.tgz /usr/src/
 ADD Setup.dist /usr/src/Python-$PYTHON_VER/Modules/Setup.dist
 RUN \
