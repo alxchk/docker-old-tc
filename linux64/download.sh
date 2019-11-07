@@ -7,6 +7,7 @@ SQLITE_VER=3300100
 SQLITE_YEAR=2019
 PYTHON_VER=2.7.17
 KRB5_VER=1.17-final
+ODBC_VER=2.3.7
 
 # VERSIONS /MAY/ BE UPDATED (In case of vulnerabilites)
 OPENSSL_SRC="https://www.openssl.org/source/openssl-$OPENSSL_VER.tar.gz"
@@ -15,6 +16,7 @@ BZIP_SRC="http://http.debian.net/debian/pool/main/b/bzip2/bzip2_$BZIP_VER.orig.t
 SQLITE_SRC="http://www.sqlite.org/$SQLITE_YEAR/sqlite-autoconf-$SQLITE_VER.tar.gz"
 PYTHON_SRC="https://www.python.org/ftp/python/$PYTHON_VER/Python-$PYTHON_VER.tgz"
 KRB5_SRC="https://github.com/krb5/krb5/archive/krb5-${KRB5_VER}.tar.gz"
+ODBC_SRC="http://www.unixodbc.org/unixODBC-${ODBC_VER}.tar.gz"
 
 # VERSIONS ARE ENOUGH
 LIBACL_SRC="http://download.savannah.gnu.org/releases/acl/acl-2.2.53.tar.gz"
@@ -38,15 +40,15 @@ PYGOBJECT="http://ftp.gnome.org/pub/GNOME/sources/pygobject/3.2/pygobject-3.2.2.
 DBUS_PYTHON="https://dbus.freedesktop.org/releases/dbus-python/dbus-python-0.84.0.tar.gz"
 
 # ENV
-SELF=`readlink -f "$0"`
-DOWNLOADS=`dirname "$SELF"`/downloads
+SELF=$(readlink -f "$0")
+DOWNLOADS=$(dirname "$SELF")/downloads
 
 mkdir -p $DOWNLOADS
 cd $DOWNLOADS
 for bin in "$MAKE_SRC" "$OPENSSL_SRC" "$ZLIB_SRC" "$BZIP_SRC" "$SQLITE_SRC" "$LIBFFI_SRC" \
-                       "$PYTHON_SRC" "$PKGCONFIG_SRC" "$GLIB_SRC" "$LIBACL_SRC" "$LIBATTR_SRC" \
-                       "$LIBCAP_SRC" "$DBUS_SRC" "$DBUS_GLIB_SRC" "$GOBJECT_INTROSPECTION" \
-                       "$PYGOBJECT" "$DBUS_PYTHON" "$M4_SRC" "$AUTOCONF_SRC" \
-		       "$PORTAUDIO_SRC" "$OPUS_SRC" "$AUTOMAKE_SRC" "$KRB5_SRC"; do
+    "$PYTHON_SRC" "$PKGCONFIG_SRC" "$GLIB_SRC" "$LIBACL_SRC" "$LIBATTR_SRC" \
+    "$LIBCAP_SRC" "$DBUS_SRC" "$DBUS_GLIB_SRC" "$GOBJECT_INTROSPECTION" \
+    "$PYGOBJECT" "$DBUS_PYTHON" "$M4_SRC" "$AUTOCONF_SRC" \
+    "$PORTAUDIO_SRC" "$OPUS_SRC" "$AUTOMAKE_SRC" "$KRB5_SRC" "$ODBC_SRC"; do
     wget -qc "$bin" || exit 1
 done

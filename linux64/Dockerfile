@@ -133,7 +133,8 @@ RUN \
 
 ADD downloads/dbus-glib-0.88.tar.gz /usr/src/
 RUN \
-    cd /usr/src/dbus-glib-0.88 && ./configure --prefix=/usr && \
+    cd /usr/src/dbus-glib-0.88 && ./configure --prefix=/usr \
+    --enable-static --disable-shared && \
     make && make install && rm -rf /usr/src/dbus-glib-0.88
 
 ADD downloads/dbus-python-0.84.0.tar.gz /usr/src/
@@ -193,6 +194,15 @@ RUN \
     sed -i /usr/bin/krb5-config -e \
 	's@echo $lib_flags@echo "-Wl,-no-undefined -Wl,--start-group $lib_flags -lkrb5support -Wl,--end-group \
 	$GEN_LIB $LIBS $DL_LIB"@g'
+
+ENV ODBC_SRC=2.3.7
+ADD downloads/unixODBC-$ODBC_SRC.tar.gz /usr/src
+RUN \
+    cd /usr/src/unixODBC-$ODBC_SRC && \
+    ./configure --prefix=/usr \
+    --disable-readline --enable-setlibversion \
+    --enable-static --disable-shared && \
+    make && make install
 
 ADD downloads/pa_stable_v190600_20161030.tgz /usr/src
 RUN \
