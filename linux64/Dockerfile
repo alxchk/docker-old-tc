@@ -199,9 +199,15 @@ ENV ODBC_SRC=2.3.7
 ADD downloads/unixODBC-$ODBC_SRC.tar.gz /usr/src
 RUN \
     cd /usr/src/unixODBC-$ODBC_SRC && \
-    ./configure --prefix=/usr \
+    ./configure --prefix=/usr --sysconfdir=/etc --enable-inicaching \
     --disable-readline --enable-setlibversion \
-    --enable-static --disable-shared && \
+    --enable-shared --disable-static && \
+    sed -e 's@static @@g' \
+	odbcinst/SQLGetPrivateProfileString.c > odbcinst/SQLGetPrivateProfileString.c_ && \
+	rm odbcinst/SQLGetPrivateProfileString.c && \
+	mv -f odbcinst/SQLGetPrivateProfileString.c_ odbcinst/SQLGetPrivateProfileString.c && \
+    echo 'save_ini_cache' >> odbcinst/odbcinst.exp && \
+    echo '__clear_ini_cache' >> odbcinst/odbcinst.exp && \
     make && make install
 
 ADD downloads/pa_stable_v190600_20161030.tgz /usr/src
