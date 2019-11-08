@@ -243,7 +243,7 @@ COPY --from=0 / /
 
 ENV \
     CFLAGS="-Os -DNDEBUG -fPIC -pipe -L/opt/static" \
-    CXXFLAGS="-Os -DNDEBUG -fPIC -pipe" \
+    CXXFLAGS="-Os -DNDEBUG -fPIC -pipe  -L/opt/static" \
     LDFLAGS="-s -O1 -fPIC -L/opt/static" \
     LC_ALL=C \
     TERM= \
