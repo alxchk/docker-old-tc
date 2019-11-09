@@ -8,6 +8,9 @@ SQLITE_YEAR=2019
 PYTHON_VER=2.7.17
 KRB5_VER=1.17-final
 ODBC_VER=2.3.7
+PG_VER=12.0
+PGODBC_VER=12.00.0000
+MARIADBODBC_VER=3.1.4
 
 # VERSIONS /MAY/ BE UPDATED (In case of vulnerabilites)
 OPENSSL_SRC="https://www.openssl.org/source/openssl-$OPENSSL_VER.tar.gz"
@@ -17,6 +20,8 @@ SQLITE_SRC="http://www.sqlite.org/$SQLITE_YEAR/sqlite-autoconf-$SQLITE_VER.tar.g
 PYTHON_SRC="https://www.python.org/ftp/python/$PYTHON_VER/Python-$PYTHON_VER.tgz"
 KRB5_SRC="https://github.com/krb5/krb5/archive/krb5-${KRB5_VER}.tar.gz"
 ODBC_SRC="http://www.unixodbc.org/unixODBC-${ODBC_VER}.tar.gz"
+PG_SRC="https://ftp.postgresql.org/pub/source/v$PG_VER/postgresql-$PG_VER.tar.gz"
+PGODBC_SRC="https://ftp.postgresql.org/pub/odbc/versions/src/psqlodbc-$PGODBC_VER.tar.gz"
 
 # VERSIONS ARE ENOUGH
 LIBACL_SRC="http://download.savannah.gnu.org/releases/acl/acl-2.2.53.tar.gz"
@@ -50,6 +55,6 @@ for bin in "$MAKE_SRC" "$OPENSSL_SRC" "$ZLIB_SRC" "$BZIP_SRC" "$SQLITE_SRC" "$LI
     "$PYTHON_SRC" "$PKGCONFIG_SRC" "$GLIB_SRC" "$LIBACL_SRC" "$LIBATTR_SRC" \
     "$LIBCAP_SRC" "$DBUS_SRC" "$DBUS_GLIB_SRC" "$GOBJECT_INTROSPECTION" \
     "$PYGOBJECT" "$DBUS_PYTHON" "$M4_SRC" "$AUTOCONF_SRC" \
-    "$PORTAUDIO_SRC" "$OPUS_SRC" "$LIBALSA_SRC" "$AUTOMAKE_SRC" "$KRB5_SRC" "$ODBC_SRC"; do
+    "$PORTAUDIO_SRC" "$OPUS_SRC" "$LIBALSA_SRC" "$AUTOMAKE_SRC" "$KRB5_SRC" "$ODBC_SRC" "$PG_SRC" "$PGODBC_SRC"; do
     wget -qc "$bin" || exit 1
 done

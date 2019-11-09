@@ -198,20 +198,14 @@ RUN \
 	$GEN_LIB $LIBS $DL_LIB"@g' < /usr/bin/krb5-config.bak > /usr/bin/krb5-config && \
     rm /usr/bin/krb5-config.bak
 
-ENV ODBC_SRC=2.3.7
-ADD downloads/unixODBC-$ODBC_SRC.tar.gz /usr/src
+ENV ODBC_VER=2.3.7
+ADD downloads/unixODBC-$ODBC_VER.tar.gz /usr/src
 RUN \
-    cd /usr/src/unixODBC-$ODBC_SRC && \
+    cd /usr/src/unixODBC-$ODBC_VER && \
     ./configure --prefix=/usr --sysconfdir=/etc --enable-inicaching \
     --disable-readline --enable-setlibversion \
     --enable-shared --disable-static && \
-    sed -e 's@static @@g' \
-	odbcinst/SQLGetPrivateProfileString.c > odbcinst/SQLGetPrivateProfileString.c_ && \
-	rm odbcinst/SQLGetPrivateProfileString.c && \
-	mv -f odbcinst/SQLGetPrivateProfileString.c_ odbcinst/SQLGetPrivateProfileString.c && \
-    echo 'save_ini_cache' >> odbcinst/odbcinst.exp && \
-    echo '__clear_ini_cache' >> odbcinst/odbcinst.exp && \
-    make && make install
+    make && make install && rm -rf /usr/src/unixODBC-$ODBC_VER
 
 ADD downloads/alsa-lib-1.0.15.tar.bz2 /usr/src
 RUN \
@@ -232,6 +226,25 @@ RUN \
 	--enable-static --disable-shared --disable-intrinsics \
 	--disable-rtcd && make && make install && \
    rm -rf /usr/src/opus-1.3
+
+ENV PG_VER=12.0
+ADD downloads/postgresql-$PG_VER.tar.gz /usr/src
+RUN \
+    cd /usr/src/postgresql-$PG_VER && \
+        ./configure --without-gssapi --without-readline \
+        --with-openssl --prefix=/usr --sysconfdir=/etc && \
+        make -C src/interfaces/libpq install && \
+        make -C src/bin/pg_config install && \
+        make -C src/backend generated-headers && \
+        make -C src/include install && \
+    rm -rf /usr/src/postgresql-PG_VER
+
+ENV PGODBC_VER=12.00.0000
+ADD downloads/psqlodbc-$PGODBC_VER.tar.gz /usr/src
+RUN cd /usr/src/psqlodbc-$PGODBC_VER && \
+    ( ./configure --prefix=/usr --sysconfdir=/etc && \
+    make && make install && rm -rf /usr/src/postgresql-$PG_VER ) || \
+    ( cat config.log ; exit 1)
 
 RUN \
     rm -rf /usr/share/locale /usr/share/man /usr/share/info
