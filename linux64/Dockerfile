@@ -235,6 +235,32 @@ RUN cd /usr/src/psqlodbc-$PGODBC_VER && \
     make && make install && rm -rf /usr/src/postgresql-$PG_VER ) || \
     ( cat config.log ; exit 1)
 
+ADD downloads/libidn-1.11.tar.gz /usr/src
+RUN \
+    cd /usr/src/libidn-1.11 && \
+        ./configure --prefix=/usr  --enable-static && \
+        make && make install && \
+        rm -rf /usr/src/libidn-1.11
+
+ADD downloads/cmake-3.1.3-Linux-x86_64.tar.gz /usr/src
+RUN \
+    cp -r /usr/src/cmake-3.1.3-Linux-x86_64/* / && \
+    rm -rf /usr/src/cmake-3.1.3-Linux-x86_64
+
+ENV MYSQLC_VER=3.1.4
+ADD downloads/mariadb-connector-c-$MYSQLC_VER-src.tar.gz /usr/src
+ADD downloads/mariadb-connector-odbc-$MYSQLC_VER-ga-src.tar.gz /usr/src
+RUN \
+    mv /usr/src/mariadb-connector-c-$MYSQLC_VER-src \
+        /usr/src/mariadb-connector-odbc-$MYSQLC_VER-ga-src/libmariadb && \
+    cd /usr/src/mariadb-connector-odbc-$MYSQLC_VER-ga-src && \
+    sed -e 's@defined(__GNUC__)@0@g' libmariadb/include/ma_context.h > \
+        libmariadb/include/ma_context.h_ && \
+    mv -f libmariadb/include/ma_context.h_ libmariadb/include/ma_context.h && \
+    CFLAGS="$CFLAGS -DPTHREAD_MUTEX_RECURSIVE=1" cmake \
+        -DCMAKE_INSTALL_PREFIX=/usr . && make && make install && \
+    rm -rf /usr/src/mariadb-connector-odbc-$MYSQLC_VER-ga-src
+
 RUN \
     rm -rf /usr/share/locale /usr/share/man /usr/share/info
 

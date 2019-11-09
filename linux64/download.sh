@@ -10,6 +10,7 @@ KRB5_VER=1.17-final
 ODBC_VER=2.3.7
 PG_VER=12.0
 PGODBC_VER=12.00.0000
+MARIADBODBC_VER=3.1.4
 
 # VERSIONS /MAY/ BE UPDATED (In case of vulnerabilites)
 OPENSSL_SRC="https://www.openssl.org/source/openssl-$OPENSSL_VER.tar.gz"
@@ -21,6 +22,8 @@ KRB5_SRC="https://github.com/krb5/krb5/archive/krb5-${KRB5_VER}.tar.gz"
 ODBC_SRC="http://www.unixodbc.org/unixODBC-${ODBC_VER}.tar.gz"
 PG_SRC="https://ftp.postgresql.org/pub/source/v$PG_VER/postgresql-$PG_VER.tar.gz"
 PGODBC_SRC="https://ftp.postgresql.org/pub/odbc/versions/src/psqlodbc-$PGODBC_VER.tar.gz"
+MYSQLC_SRC="https://downloads.mariadb.com/Connectors/c/connector-c-3.1.4/mariadb-connector-c-$MARIADBODBC_VER-src.tar.gz"
+MYSQLODBC_SRC="https://downloads.mariadb.org/interstitial/connector-odbc-3.1.4/mariadb-connector-odbc-$MARIADBODBC_VER-ga-src.tar.gz"
 
 # VERSIONS ARE ENOUGH
 LIBACL_SRC="http://download.savannah.gnu.org/releases/acl/acl-2.2.53.tar.gz"
@@ -33,6 +36,8 @@ AUTOCONF_SRC="https://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.gz"
 AUTOMAKE_SRC="https://ftp.gnu.org/gnu/automake/automake-1.15.tar.gz"
 PORTAUDIO_SRC="http://www.portaudio.com/archives/pa_stable_v190600_20161030.tgz"
 OPUS_SRC="https://archive.mozilla.org/pub/opus/opus-1.3.tar.gz"
+CMAKE_BIN="https://github.com/Kitware/CMake/releases/download/v3.1.3/cmake-3.1.3-Linux-x86_64.tar.gz"
+LIBIDN_SRC="https://ftp.gnu.org/gnu/libidn/libidn-1.11.tar.gz"
 
 # VERSIONS ARE IMPORTANT
 MAKE_SRC="http://ftp.gnu.org/gnu/make/make-3.82.tar.gz"
@@ -54,6 +59,6 @@ for bin in "$MAKE_SRC" "$OPENSSL_SRC" "$ZLIB_SRC" "$BZIP_SRC" "$SQLITE_SRC" "$LI
     "$LIBCAP_SRC" "$DBUS_SRC" "$DBUS_GLIB_SRC" "$GOBJECT_INTROSPECTION" \
     "$PYGOBJECT" "$DBUS_PYTHON" "$M4_SRC" "$AUTOCONF_SRC" \
     "$PORTAUDIO_SRC" "$OPUS_SRC" "$AUTOMAKE_SRC" "$KRB5_SRC" "$ODBC_SRC" \
-    "$PG_SRC" "$PGODBC_SRC"; do
+    "$PG_SRC" "$PGODBC_SRC" "$MYSQLC_SRC" "$MYSQLODBC_SRC" "$LIBIDN_SRC" "$CMAKE_BIN"; do
     wget -qc "$bin" || exit 1
 done
