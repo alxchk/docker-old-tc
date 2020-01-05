@@ -63,7 +63,7 @@ RUN \
     CC="gcc -Os -fPIC" ./Configure --prefix=/usr no-hw-xxx shared \
         no-dso no-err no-krb5 no-hw no-ssl2 enable-weak-ssl-ciphers linux-generic64 && \
     make depend >/dev/null 2>/dev/null && \
-    make && make install ; \
+    make && make install_sw ; \
     cp libssl.so.1.0.0 /usr/lib/libssl.so && \
     cp libcrypto.so.1.0.0  /usr/lib/libcrypto.so && \
     mkdir -p /usr/lib/pkgconfig/ && \
@@ -193,7 +193,7 @@ RUN \
 RUN \
     sed -i /usr/bin/krb5-config -e \
 	's@echo $lib_flags@echo "-Wl,-no-undefined -Wl,--start-group $lib_flags -lkrb5support -Wl,--end-group \
-	$GEN_LIB $LIBS $DL_LIB"@g'
+	$GEN_LIB $LIBS $DL_LIB"@g' && rm -rf /usr/src/krb5-krb5-$KRB5_VER
 
 ENV ODBC_VER=2.3.7
 ADD downloads/unixODBC-$ODBC_VER.tar.gz /usr/src
