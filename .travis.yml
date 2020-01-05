@@ -5,6 +5,8 @@ os:
 - linux
 language:
 - generic
+install:
+- sudo apt-get install -y binfmt-support qemu-user-static
 script:
 - docker login -u="$DOCKER_USER" -p="$DOCKER_PASS"
 - export REPO=alxchk/docker-old-tc
