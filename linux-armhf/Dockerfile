@@ -12,6 +12,8 @@ ENV \
     PYTHON_ABI_MODE="shared" \
     PATH="/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:/"
 
+USER 0:0
+
 ADD compat /usr/include/
 
 ADD downloads/make-3.82.tar.gz /usr/src/
@@ -21,14 +23,14 @@ RUN \
     apt-get --force-yes -y remove make << /dev/null && \
     rm -rf /usr/src/make-3.82
 
-ENV ZLIB_VER=1.2.11
+ARG ZLIB_VER=1.2.11
 ADD downloads/zlib-$ZLIB_VER.tar.gz /usr/src/
 RUN \
     cd /usr/src/zlib-$ZLIB_VER && CFLAGS="$CFLAGS -fvisibility=hidden" \
     ./configure --prefix=/usr --static && make && make install && \
     rm -rf /usr/src/zlib-$ZLIB_VER
 
-ENV BZIP_VER=1.0.6
+ARG BZIP_VER=1.0.6
 ADD downloads/bzip2_$BZIP_VER.orig.tar.bz2 /usr/src/
 RUN \
     cd /usr/src/bzip2-$BZIP_VER && \
@@ -48,7 +50,7 @@ RUN \
     ./configure --enable-static --prefix=/usr && \
     make install && rm -rf /usr/src/libffi-3.2.1
 
-ENV SQLITE_VER=3300100
+ARG SQLITE_VER=3300100
 ADD downloads/sqlite-autoconf-$SQLITE_VER.tar.gz /usr/src/
 RUN \
     cd /usr/src/sqlite-autoconf-$SQLITE_VER && \
@@ -56,12 +58,13 @@ RUN \
 	--disable-dynamic-extensions --enable-static --disable-shared && \
     make && make install && rm -rf /usr/src/sqlite-autoconf-$SQLITE_VER
 
-ENV OPENSSL_VER=1.0.2t
+ARG OPENSSL_VER=1.0.2t
 ADD downloads/openssl-$OPENSSL_VER.tar.gz /usr/src/
 RUN \
     cd /usr/src/openssl-$OPENSSL_VER/ && \
-    CC="gcc -Os -fPIC" ./Configure --prefix=/usr no-hw-xxx shared \
-        no-dso no-err no-krb5 no-hw no-ssl2 enable-weak-ssl-ciphers linux-generic64 && \
+    CC="gcc -Os -fPIC" ./Configure --prefix=/usr enable-static-engine shared \
+        no-dso no-err no-krb5 no-hw no-ssl2 enable-weak-ssl-ciphers no-unit-test \
+        linux-generic && \
     make depend >/dev/null 2>/dev/null && \
     make && make install_sw ; \
     cp libssl.so.1.0.0 /usr/lib/libssl.so && \
@@ -72,7 +75,8 @@ RUN \
     ldconfig -n . && \
     ln -s /usr/lib/libssl.so /usr/lib/libssl.so.1 && \
     ln -s /usr/lib/libcrypto.so /usr/lib/libcrypto.so.1 && \
-    rm -rf /usr/src/openssl-$OPENSSL_VER
+    cd /usr/src/openssl-$OPENSSL_VER/ && make clean && \
+    cd / && rm -rf /usr/src/openssl-$OPENSSL_VER
 
 ADD downloads/attr-2.4.48.tar.gz /usr/src
 RUN \
@@ -97,7 +101,7 @@ RUN \
 	install && cp -r libcap/include/uapi/linux/ /usr/include/ && \
 	rm -rf /usr/src/libcap-2.25
 
-ENV PYTHON_VER=2.7.17
+ARG PYTHON_VER=2.7.17
 ADD downloads/Python-$PYTHON_VER.tgz /usr/src/
 ADD Setup.dist /usr/src/Python-$PYTHON_VER/Modules/Setup.dist
 RUN \
@@ -179,7 +183,7 @@ RUN \
     cd /usr/src/automake-1.15 && ./configure --prefix=/usr && \
     make && make install && rm -rf /usr/src/automake-1.15
 
-ENV KRB5_VER=1.17-final
+ARG KRB5_VER=1.17-final
 ADD downloads/krb5-$KRB5_VER.tar.gz /usr/src
 RUN \
     cd /usr/src/krb5-krb5-$KRB5_VER/src && \
@@ -196,7 +200,7 @@ RUN \
 	's@echo $lib_flags@echo "-Wl,-no-undefined -Wl,--start-group $lib_flags -lkrb5support -Wl,--end-group \
 	$GEN_LIB $LIBS $DL_LIB"@g' && rm -rf /usr/src/krb5-krb5-$KRB5_VER
 
-ENV ODBC_VER=2.3.7
+ARG ODBC_VER=2.3.7
 ADD downloads/unixODBC-$ODBC_VER.tar.gz /usr/src
 RUN \
     cd /usr/src/unixODBC-$ODBC_VER && \
@@ -217,7 +221,7 @@ RUN \
 	--enable-static --disable-shared && make && make install && \
    rm -rf /usr/src/opus-1.3
 
-ENV PG_VER=12.0
+ARG PG_VER=12.0
 ADD downloads/postgresql-$PG_VER.tar.gz /usr/src
 RUN \
     cd /usr/src/postgresql-$PG_VER && \
@@ -229,7 +233,7 @@ RUN \
         make -C src/include install && \
     rm -rf /usr/src/postgresql-PG_VER
 
-ENV PGODBC_VER=12.00.0000
+ARG PGODBC_VER=12.00.0000
 ADD downloads/psqlodbc-$PGODBC_VER.tar.gz /usr/src
 RUN cd /usr/src/psqlodbc-$PGODBC_VER && \
     ( ./configure --prefix=/usr --sysconfdir=/etc && \
@@ -243,7 +247,7 @@ RUN \
         make && make install && \
         rm -rf /usr/src/libidn-1.11
 
-ENV MYSQLC_VER=3.1.4
+ARG MYSQLC_VER=3.1.4
 ADD downloads/mariadb-connector-c-$MYSQLC_VER-src.tar.gz /usr/src
 ADD downloads/mariadb-connector-odbc-$MYSQLC_VER-ga-src.tar.gz /usr/src
 RUN \
@@ -263,6 +267,9 @@ RUN \
     apt-get clean
 
 RUN mkdir -p /build/workspace/project
+
+RUN \
+    find / -xdev ! -uid 0 -or ! -gid 0 -exec chown 0:0 '{}' ';'
 
 FROM scratch
 COPY --from=0 / /

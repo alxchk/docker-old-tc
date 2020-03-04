@@ -9,6 +9,8 @@ ENV \
     PATH=/usr/bin:/usr/sbin:/bin:/sbin:/usr/local/bin \
     BUILDOZER_CACHE=/build/buildozer
 
+USER 0:0
+
 RUN mkdir /build && dpkg --add-architecture i386 && \
 	mkdir -p /usr/share/man/man1/ && \
 	apt-get update && apt-get install  --no-install-recommends -y \
@@ -21,6 +23,9 @@ RUN mkdir /build && dpkg --add-architecture i386 && \
 ADD downloads/*.zip /build/
 
 RUN \
+    python -m pip install --upgrade pip setuptools six
+
+RUN \
     cd /build; unzip python-for-android.zip && \
 	mv python-for-android-master python-for-android && \
     pip install /build/buildozer.zip && \
@@ -30,9 +35,15 @@ RUN mkdir -p /root/project
 
 ADD \
 	downloads/android-ndk-r9c-linux-x86_64.tar.bz2 \
+	/root/.buildozer/android/platform/
+
+ADD \
 	downloads/apache-ant-1.9.4-bin.tar.gz \
+	/root/.buildozer/android/platform/
+
+ADD \
 	downloads/android-sdk_r20-linux.tgz \
-		/root/.buildozer/android/platform/
+	/root/.buildozer/android/platform/
 
 RUN \
 	mv /root/.buildozer/android/platform/android-sdk-linux \
@@ -53,6 +64,8 @@ RUN \
 	rm -rf /root/.buildozer/android/platform/android-ndk-*/samples && \
 	rm -rf $BUILDOZER_CACHE/android/platform/build/build/other_builds
 
+RUN \
+    find / -xdev ! -uid 0 -or ! -gid 0 -exec chown 0:0 '{}' ';'
 
 FROM scratch
 COPY --from=0 / /
