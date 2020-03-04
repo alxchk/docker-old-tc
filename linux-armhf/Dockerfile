@@ -247,7 +247,7 @@ RUN \
         make && make install && \
         rm -rf /usr/src/libidn-1.11
 
-ARG MYSQLC_VER=3.1.4
+ARG MYSQLC_VER=3.1.6
 ADD downloads/mariadb-connector-c-$MYSQLC_VER-src.tar.gz /usr/src
 ADD downloads/mariadb-connector-odbc-$MYSQLC_VER-ga-src.tar.gz /usr/src
 RUN \
