@@ -36,7 +36,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
-requirements = pycrypto,plyer,psutil,tinyec,netaddr,rpyc,pyjnius,pyuv,cryptography,sqlite3,kcp
+requirements = pycryptodome,plyer,psutil,tinyec,netaddr,pyjnius,pyuv,cryptography,sqlite3,kcp
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -211,7 +211,7 @@ android.arch = armeabi-v7a
 [buildozer]
 
 # (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
-log_level = 0
+log_level = 1
 
 # (int) Display warning if buildozer is run as root (0 = False, 1 = True)
 warn_on_root = 0
