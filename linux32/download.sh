@@ -1,6 +1,6 @@
 #!/bin/bash
 
-OPENSSL_VER=1.0.2t
+OPENSSL_VER=1.1.1d
 ZLIB_VER=1.2.11
 BZIP_VER=1.0.6
 SQLITE_VER=3300100
@@ -37,6 +37,7 @@ AUTOMAKE_SRC="https://ftp.gnu.org/gnu/automake/automake-1.15.tar.gz"
 LIBALSA_SRC="http://www.mirrorservice.org/sites/ftp.alsa-project.org/pub/lib/alsa-lib-1.0.15.tar.bz2"
 PORTAUDIO_SRC="http://www.portaudio.com/archives/pa_stable_v190600_20161030.tgz"
 OPUS_SRC="https://archive.mozilla.org/pub/opus/opus-1.3.tar.gz"
+PERL_SRC="https://www.cpan.org/src/5.0/perl-5.30.1.tar.gz"
 CMAKE_BIN="https://github.com/Kitware/CMake/releases/download/v2.8.12.2/cmake-2.8.12.2-Linux-i386.tar.gz"
 
 # VERSIONS ARE IMPORTANT
@@ -59,6 +60,6 @@ for bin in "$MAKE_SRC" "$OPENSSL_SRC" "$ZLIB_SRC" "$BZIP_SRC" "$SQLITE_SRC" "$LI
     "$LIBCAP_SRC" "$DBUS_SRC" "$DBUS_GLIB_SRC" "$GOBJECT_INTROSPECTION" \
     "$PYGOBJECT" "$DBUS_PYTHON" "$M4_SRC" "$AUTOCONF_SRC" \
     "$PORTAUDIO_SRC" "$OPUS_SRC" "$LIBALSA_SRC" "$AUTOMAKE_SRC" "$KRB5_SRC" "$ODBC_SRC" \
-    "$PG_SRC" "$PGODBC_SRC" "$CMAKE_BIN" "$MYSQLC_SRC" "$MYSQLODBC_SRC"; do
+    "$PG_SRC" "$PGODBC_SRC" "$CMAKE_BIN" "$MYSQLC_SRC" "$MYSQLODBC_SRC" "$PERL_SRC"; do
     wget -qc "$bin" || (echo "Failed to download $bin"; exit 1)
 done

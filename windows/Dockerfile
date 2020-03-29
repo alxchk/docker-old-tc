@@ -3,7 +3,7 @@ FROM debian:buster-slim
 LABEL maintainer "alxchk@gmail.com"
 
 ARG BUILDENV="/build"
-ARG RC="${BUILDENV}/rc-with-includes"
+ARG RCDIR="${BUILDENV}/rc-with-includes"
 ARG DOWNLOADS="${BUILDENV}/downloads"
 ARG WINE32="${BUILDENV}/win32"
 ARG WINE64="${BUILDENV}/win64"
@@ -31,7 +31,7 @@ ENV \
     DOS_RC="x:" \
     WINE32=${WINE32} \
     WINE64=${WINE64} \
-    RC=${RC} \
+    RCDIR=${RCDIR} \
     DOWNLOADS=${DOWNLOADS} \
     BUILDENV=${BUILDENV}
 
@@ -49,8 +49,8 @@ RUN \
     rm -vf $WINE64/dosdevices/$DOS_RC && \
     ln -Tnvs $DOWNLOADS $WINE32/dosdevices/$DOS_DOWNLOADS && \
     ln -Tnvs $DOWNLOADS $WINE64/dosdevices/$DOS_DOWNLOADS && \
-    ln -Tnvs $RC $WINE32/dosdevices/$DOS_RC && \
-    ln -Tnvs $RC $WINE64/dosdevices/$DOS_RC
+    ln -Tnvs ${RCDIR} $WINE32/dosdevices/$DOS_RC && \
+    ln -Tnvs ${RCDIR} $WINE64/dosdevices/$DOS_RC
 
 ARG NASM_VER=2.14.02
 
@@ -66,9 +66,9 @@ RUN \
         rm -f ${DOWNLOADS}/nasm-${NASM_VER}-win64.zip
 
 COPY \
-    rc-with-includes ${RC}
+    rc-with-includes ${RCDIR}
 
-ARG PERL="strawberry-perl-5.28.1.1"
+ARG PERL_VER=5.28.1.1
 ARG PYTHON_VER=2.7.17
 
 COPY \
@@ -76,14 +76,14 @@ COPY \
     downloads/winetricks \
     downloads/python-${PYTHON_VER}.msi \
     downloads/python-${PYTHON_VER}.amd64.msi \
-    downloads/${PERL}-32bit.msi \
-    downloads/${PERL}-64bit.msi ${DOWNLOADS}/
+    downloads/strawberry-perl-${PERL_VER}-32bit.msi \
+    downloads/strawberry-perl-${PERL_VER}-64bit.msi ${DOWNLOADS}/
 
 RUN \
     WINEPREFIX=${WINE32} wineboot -u && \
     WINEPREFIX=${WINE64} wineboot -u && \
-    WINEPREFIX=$WINE32 msiexec /i ${DOS_DOWNLOADS}\\${PERL}-32bit.msi /q && \
-    WINEPREFIX=$WINE64 msiexec /i ${DOS_DOWNLOADS}\\${PERL}-64bit.msi /q && \
+    WINEPREFIX=$WINE32 msiexec /i ${DOS_DOWNLOADS}\\strawberry-perl-${PERL_VER}-32bit.msi /q && \
+    WINEPREFIX=$WINE64 msiexec /i ${DOS_DOWNLOADS}\\strawberry-perl-${PERL_VER}-64bit.msi /q && \
     WINEPREFIX=$WINE32 msiexec /i $DOS_DOWNLOADS\\python-$PYTHON_VER.msi /q && \
     WINEPREFIX=$WINE64 msiexec /i $DOS_DOWNLOADS\\python-$PYTHON_VER.amd64.msi /q && \
     WINEPREFIX=$WINE32 msiexec /i $DOS_DOWNLOADS\\VCForPython27.msi /q && \
@@ -107,7 +107,8 @@ RUN \
     touch ${WINE64}/drive_c/windows/Microsoft.NET/Framework64/empty.txt && \
     rm -f ${DOWNLOADS}/winetricks && \
     rm -f ${DOWNLOADS}/VCForPython27.msi && \
-    rm -f  ${DOWNLOADS}/${PERL}-32bit.msi ${DOWNLOADS}/${PERL}-64bit.msi && \
+    rm -f  ${DOWNLOADS}/strawberry-perl-${PERL_VER}-32bit.msi \
+        ${DOWNLOADS}/strawberry-perl-${PERL_VER}-64bit.msi && \
     WINEPREFIX=${WINE32} wineboot -e && \
     WINEPREFIX=${WINE64} wineboot -e && \
     WINEPREFIX=${WINE32} wineboot -f && \
@@ -118,48 +119,88 @@ RUN \
 COPY wrappers/32 ${WINE32}
 COPY wrappers/64 ${WINE64}
 
-ARG OPENSSL_VER=1.0.2t
+ARG OPENSSL_VER=1.1.1d
+ENV OPENSSL_ABI_VER=1_1
+
+ARG OPENSSL_OPTIONS="shared no-async enable-static-engine no-autoload-config no-cms no-hw no-ssl2 enable-weak-ssl-ciphers no-unit-test no-filenames no-gost no-sctp no-srp no-tests no-ts no-dtls no-dtls1 no-dtls1_2 no-err no-ui"
+
+ENV WINEPATH="C:\\nasm-${NASM_VER};C:\\Python27;C:\\Python27\\Scripts;C:\\Strawberry\\perl\\bin"
 
 ADD \
     downloads/openssl-${OPENSSL_VER}.tar.gz ${BUILDENV}
 
-ARG OPENSSL_OPTIONS="no-gost no-hw no-comp no-err no-srp enable-weak-ssl-ciphers enable-static-engine no-unit-test enable-rc5"
+RUN \
+    cd ${BUILDENV}/openssl-${OPENSSL_VER} && \
+    sed -e 's@/Zi[^"]*@@;s@/debug@@g;' -i Configurations/10-main.conf && \
+    sed -e 's@|| (DEL /Q \\$(\\\@B).\* $import && EXIT 1)@@g' -i \
+        Configurations/windows-makefile.tmpl && \
+    MT=echo ${WINE64}/perl.sh Configure VC-WIN64A \
+        --prefix=C:\\openssl-build --release $OPENSSL_OPTIONS \
+            CFLAGS="/nologo /GL /Os /GF /Gy /GA" \
+            LDFLAGS="/nologo /OPT:REF /OPT:ICF /LTCG" && \
+    ${WINE64}/nmake.sh build_libs && \
+    touch libcrypto-${OPENSSL_ABI_VER}-x64.pdb && \
+    touch libssl-${OPENSSL_ABI_VER}-x64.pdb && \
+    ${WINE64}/nmake.sh install_dev && \
+    rm -rf ${BUILDENV}/openssl-${OPENSSL_VER} && \
+    cp -vr ${WINE64}/drive_c/openssl-build/include/openssl ${WINE64}/drive_c/Python27/include/ && \
+    cp -v ${WINE64}/drive_c/openssl-build/bin/*.dll ${WINE64}/drive_c/Python27 && \
+    cp -v ${WINE64}/drive_c/openssl-build/lib/*.lib ${WINE64}/drive_c/Python27/libs && \
+    rm -rf ${WINE64}/drive_c/openssl-build
 
-ENV WINEPATH="C:\\nasm-${NASM_VER};C:\\Python27;C:\\Python27\\Scripts;C:\\Strawberry\\perl\\bin"
+ADD \
+    downloads/openssl-${OPENSSL_VER}.tar.gz ${BUILDENV}
 
 RUN \
     cd ${BUILDENV}/openssl-${OPENSSL_VER} && \
-    ${WINE64}/perl.sh Configure VC-WIN64A \
-        --prefix=C:\\openssl-build $OPENSSL_OPTIONS && \
-    ${WINE64}/cmd.sh /c ms\\do_win64a.bat && \
-    sed -i -e 's@/Zi@@g;s@/debug@@g;s@\$(T_EXE)@@g' ms/nt.mak && \
-    ${WINE64}/nmake.sh -f ms\\nt.mak && \
-    ${WINE64}/nmake.sh -f ms\\nt.mak install && \
-    ${WINE64}/nmake.sh -f ms\\nt.mak clean && \
-    ${WINE32}/perl.sh Configure VC-WIN32 \
-        --prefix=C:\\openssl-build $OPENSSL_OPTIONS && \
-    ${WINE32}/cmd.sh /c ms\\do_ms.bat && \
-    ${WINE32}/cmd.sh /c ms\\do_nasm.bat && \
-    sed -i -e 's@/Zi@@g;s@/debug@@g;s@\$(T_EXE)@@g' ms/nt.mak && \
-    ${WINE32}/nmake.sh -f ms\\nt.mak && \
-    ${WINE32}/nmake.sh -f ms\\nt.mak install && \
+    sed -e 's@/Zi[^"]*@@;s@/debug@@g;' -i Configurations/10-main.conf && \
+    sed -e 's@|| (DEL /Q \\$(\\\@B).\* $import && EXIT 1)@@g' -i \
+        Configurations/windows-makefile.tmpl && \
+    MT=echo ${WINE32}/perl.sh Configure VC-WIN32 \
+        --prefix=C:\\openssl-build --release $OPENSSL_OPTIONS \
+            CFLAGS="/nologo /GL /Os /GF /Gy /GA" \
+            LDFLAGS="/nologo /OPT:REF /OPT:ICF /LTCG" && \
+    ${WINE32}/nmake.sh build_libs && \
+    touch libcrypto-${OPENSSL_ABI_VER}.pdb && \
+    touch libssl-${OPENSSL_ABI_VER}.pdb && \
+    ${WINE32}/nmake.sh install_dev && \
     rm -rf ${BUILDENV}/openssl-${OPENSSL_VER} && \
     cp -vr ${WINE32}/drive_c/openssl-build/include/openssl ${WINE32}/drive_c/Python27/include/ && \
-    cp -vr ${WINE64}/drive_c/openssl-build/include/openssl ${WINE64}/drive_c/Python27/include/ && \
-    cp -v ${WINE32}/drive_c/openssl-build/lib/ssleay32.lib ${WINE32}/drive_c/Python27/libs/libssl.lib && \
-    cp -v ${WINE32}/drive_c/openssl-build/lib/libeay32.lib ${WINE32}/drive_c/Python27/libs/libcrypto.lib && \
-    cp -v ${WINE64}/drive_c/openssl-build/lib/ssleay32.lib ${WINE64}/drive_c/Python27/libs/libssl.lib && \
-    cp -v ${WINE64}/drive_c/openssl-build/lib/libeay32.lib ${WINE64}/drive_c/Python27/libs/libcrypto.lib && \
-    rm -rf ${WINE32}/drive_c/openssl-build && \
-    rm -rf ${WINE64}/drive_c/openssl-build
+    cp -v ${WINE32}/drive_c/openssl-build/bin/*.dll ${WINE32}/drive_c/Python27 && \
+    cp -v ${WINE32}/drive_c/openssl-build/lib/*.lib ${WINE32}/drive_c/Python27/libs && \
+    rm -rf ${WINE32}/drive_c/openssl-build
 
-COPY patches /build/patches
+COPY \
+    modules/_ssl.c modules/_ssl_data.h modules/socketmodule.h \
+        ${BUILDENV}/ssl/
+
+RUN \
+    cd ${BUILDENV}/ssl && \
+    ${WINE32}/cl.sh \
+        _ssl.c \
+        /LD /D_WIN32 /IC:\\Python27\\Include \
+        C:\\Python27\\libs\\python27.lib \
+        C:\\Python27\\libs\\libcrypto.lib \
+        C:\\Python27\\libs\\libssl.lib \
+        advapi32.lib crypt32.lib ws2_32.lib \
+        /FeC:\\Python27\\DLLs\\_ssl.pyd && \
+    ${WINE64}/cl.sh \
+        _ssl.c \
+        /LD /D_WIN32 /IC:\\Python27\\Include \
+        C:\\Python27\\libs\\python27.lib \
+        C:\\Python27\\libs\\libcrypto.lib \
+        C:\\Python27\\libs\\libssl.lib \
+        advapi32.lib crypt32.lib ws2_32.lib \
+        /FeC:\\Python27\\DLLs\\_ssl.pyd && \
+    rm -rf cd ${BUILDENV}/ssl
+
+COPY patches ${BUILDENV}/patches
 COPY downloads/stdint.h ${DOWNLOADS}/
 
 RUN \
     for dir in $WINE32 $WINE64; do \
-    cd $dir/drive_c && patch --binary -p0 -i /build/patches/distutils.patch; done && \
-    rm -rf /build/patches && \
+    cd $dir/drive_c && patch --binary -p0 -i ${BUILDENV}/patches/distutils.patch; done && \
+    rm -rf ${BUILDENV}/patches && \
     cp -vf $DOWNLOADS/stdint.h \
     "$WINE32/drive_c/Program Files/Common Files/Microsoft/Visual C++ for Python/9.0/VC/include/" && \
     cp -vf $DOWNLOADS/stdint.h \
@@ -174,25 +215,20 @@ RUN apt-get remove -y python-pip python-setuptools-git \
 RUN \
     find / -xdev ! -uid 0 -or ! -gid 0 -exec chown 0:0 '{}' ';'
 
-FROM scratch
-COPY --from=0 / /
-
 ENV \
-    WINE32=/build/win32 \
-    WINE64=/build/win64 \
-    PYTHON32=/build/win32/python.sh \
-    PYTHON64=/build/win64/python.sh \
-    CL32=/build/win32/cl.sh \
-    CL64=/build/win64/cl.sh \
+    PYTHON32=${BUILDENV}/win32/python.sh \
+    PYTHON64=${BUILDENV}/win64/python.sh \
+    CL32=${BUILDENV}/win32/cl.sh \
+    CL64=${BUILDENV}/win64/cl.sh \
     MINGW64=x86_64-w64-mingw32-g++ \
     MINGW32=i686-w64-mingw32-g++ \
     WINEDEBUG="-all" \
-    PATH=/usr/bin:/usr/sbin:/bin:/sbin:/build/workspace/project:/build/workspace/.local/bin \
-    WORKSPACE=/build/workspace \
-    PROJECT=/build/workspace/project
+    PATH=/usr/bin:/usr/sbin:/bin:/sbin:${BUILDENV}/workspace/project:${BUILDENV}/workspace/.local/bin \
+    WORKSPACE=${BUILDENV}/workspace \
+    PROJECT=${BUILDENV}/workspace/project
 
-WORKDIR /build/workspace/project
-VOLUME /build/workspace/project
+WORKDIR ${BUILDENV}/workspace/project
+VOLUME ${BUILDENV}/workspace/project
 
 LABEL maintainer "alxchk@gmail.com"
 LABEL version="1.0"

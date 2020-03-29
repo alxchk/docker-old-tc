@@ -58,12 +58,12 @@ RUN \
 	--disable-dynamic-extensions --enable-static --disable-shared && \
     make && make install && rm -rf /usr/src/sqlite-autoconf-$SQLITE_VER
 
-ARG OPENSSL_VER=1.0.2t
+ARG OPENSSL_VER=1.1.1d
 ADD downloads/openssl-$OPENSSL_VER.tar.gz /usr/src/
 RUN \
     cd /usr/src/openssl-$OPENSSL_VER/ && \
     CC="gcc -Os -fPIC" ./Configure --prefix=/usr enable-static-engine shared \
-        no-dso no-err no-krb5 no-hw no-ssl2 enable-weak-ssl-ciphers no-unit-test \
+        no-dso no-err no-hw no-ssl2 enable-weak-ssl-ciphers no-unit-test \
         linux-generic && \
     make depend >/dev/null 2>/dev/null && \
     make && make install_sw ; \

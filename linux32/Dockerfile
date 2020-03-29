@@ -5,16 +5,17 @@ LABEL maintainer "alxchk@gmail.com"
 ADD compat /usr/include/
 RUN cat /usr/include/pthread-compat.h >>/usr/include/pthread.h
 
-ENV \
-    CFLAGS="-Os -DNDEBUG -fPIC -pipe -L/opt/static" \
-    CXXFLAGS="-Os -DNDEBUG -fPIC -pipe" \
-    LDFLAGS="-s -O1 -fPIC -L/opt/static" \
-    MAKEOPTS="-j 2" \
-    LC_ALL=C \
-    TERM= \
-    DEBIAN_FRONTEND=noninteractive \
-    PYTHON_ABI_MODE="shared" \
-    PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:/usr/X11R6/bin/:/
+ENV LC_ALL C
+ENV MAKEOPTS -j2
+ENV TERM ""
+ENV DEBIAN_FRONTEND noninteractive
+ENV CFLAGS -DNDEBUG -D_GNU_SOURCE -D__USE_XOPEN2K8 \
+    -Os -fPIC -pipe -L/opt/static
+ENV CXXFLAGS -DNDEBUG -D_GNU_SOURCE -D__USE_XOPEN2K8 \
+    -fvisibility=hidden -Os -fPIC -pipe -L/opt/static
+ENV LDFLAGS -fPIC -L/opt/static -static-libgcc -Wl,--no-undefined
+ENV PYTHON_ABI_MODE shared
+ENV PATH /usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:/
 
 USER 0:0
 
@@ -22,7 +23,7 @@ ADD downloads/make-3.82.tar.gz /usr/src/
 RUN \
     cd /usr/src/make-3.82 && \
     ./configure && make && make install && \
-    apt-get --force-yes -y remove make << /dev/null && \
+    apt-get --force-yes -y remove make < /dev/null && \
     rm -rf /usr/src/make-3.82
 
 ARG ZLIB_VER=1.2.11
@@ -39,45 +40,17 @@ RUN \
     make CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" && make PREFIX=/usr install && \
     rm -rf /usr/src/bzip2-$BZIP_VER
 
-ADD downloads/pkg-config-0.29.1.tar.gz /usr/src/
-RUN \
-    cd /usr/src/pkg-config-0.29.1 && \
-    ./configure --with-internal-glib --prefix=/usr && \
-    make install && rm -rf /usr/src/pkg-config-0.29.1
-
 ADD downloads/libffi_3.2.1.orig.tar.gz /usr/src/
 RUN \
     cd /usr/src/libffi-3.2.1 && \
     ./configure --enable-static --prefix=/usr && \
     make install && rm -rf /usr/src/libffi-3.2.1
 
-ARG SQLITE_VER=3300100
-ADD downloads/sqlite-autoconf-$SQLITE_VER.tar.gz /usr/src/
+ADD downloads/pkg-config-0.29.1.tar.gz /usr/src/
 RUN \
-    cd /usr/src/sqlite-autoconf-$SQLITE_VER && \
-    ./configure --prefix=/usr --disable-static-shell \
-	--disable-dynamic-extensions && \
-    make && make install && rm -rf /usr/src/sqlite-autoconf-$SQLITE_VER
-
-ARG OPENSSL_VER=1.0.2t
-ADD downloads/openssl-$OPENSSL_VER.tar.gz /usr/src/
-RUN \
-    cd /usr/src/openssl-$OPENSSL_VER/ && \
-    CC="gcc -Os -fPIC" ./Configure --prefix=/usr enable-static-engine shared \
-        no-dso no-err no-krb5 no-hw no-ssl2 enable-weak-ssl-ciphers no-unit-test \
-        linux-generic32 && \
-    make depend >/dev/null 2>/dev/null && \
-    make && make install_sw ; \
-    cp libssl.so.1.0.0 /usr/lib/libssl.so && \
-    cp libcrypto.so.1.0.0  /usr/lib/libcrypto.so && \
-    mkdir -p /usr/lib/pkgconfig/ && \
-    cp *.pc /usr/lib/pkgconfig/ && \
-    cd /usr/lib && \
-    ldconfig -n . && \
-    ln -s /usr/lib/libssl.so /usr/lib/libssl.so.1 && \
-    ln -s /usr/lib/libcrypto.so /usr/lib/libcrypto.so.1 && \
-    cd /usr/src/openssl-$OPENSSL_VER/ && make clean && \
-    cd / && rm -rf /usr/src/openssl-$OPENSSL_VER
+    cd /usr/src/pkg-config-0.29.1 && \
+    ./configure --with-internal-glib --prefix=/usr && \
+    make install && rm -rf /usr/src/pkg-config-0.29.1
 
 ADD downloads/attr-2.4.48.tar.gz /usr/src
 RUN \
@@ -91,6 +64,46 @@ RUN \
 	ac_cv_lib_attr_getxattr=yes \
 	&& make && make install && rm -rf /usr/src/acl-2.2.53
 
+ARG SQLITE_VER=3300100
+ADD downloads/sqlite-autoconf-$SQLITE_VER.tar.gz /usr/src/
+RUN \
+    cd /usr/src/sqlite-autoconf-$SQLITE_VER && \
+    ./configure --prefix=/usr --disable-static-shell \
+	--disable-dynamic-extensions -enable-static --disable-shared && \
+    make && make install && rm -rf /usr/src/sqlite-autoconf-$SQLITE_VER
+
+ADD downloads/perl-5.30.1.tar.gz /usr/src
+RUN \
+    cd /usr/src/perl-5.30.1 && ./Configure -des -Dprefix=/opt/perl5 && \
+        make && make install && cd / && rm -rf /usr/src/perl-5.30.1
+
+ENV PATH=/opt/perl5/bin:$PATH
+ENV LDFLAGS -s -Os -fPIC -L/opt/static \
+        -static-libgcc -Wl,--no-undefined -Wl,--gc-sections
+
+ARG OPENSSL_VER=1.1.1d
+ADD downloads/openssl-$OPENSSL_VER.tar.gz /usr/src/
+RUN \
+    cd /usr/src/openssl-$OPENSSL_VER/ && \
+    LDFLAGS="$LDFLAGS -lpthread" \
+    ./Configure --prefix=/usr shared \
+        no-autoload-config no-engine no-cms \
+        no-dynamic-engine no-dso no-err no-hw no-ssl2 enable-weak-ssl-ciphers no-unit-test \
+        no-filenames no-gost no-sctp no-srp no-tests no-ts \
+        no-dtls no-dtls1 no-dtls1_2 linux-generic32 && \
+    make depend >/dev/null 2>/dev/null && \
+    make && make install_sw && \
+    cp libssl.so.1.1 /usr/lib/libssl.so && \
+    cp libcrypto.so.1.1  /usr/lib/libcrypto.so && \
+    mkdir -p /usr/lib/pkgconfig/ && \
+    cp *.pc /usr/lib/pkgconfig/ && \
+    cd /usr/lib && \
+    ldconfig -n . && \
+    ln -s /usr/lib/libssl.so /usr/lib/libssl.so.1 && \
+    ln -s /usr/lib/libcrypto.so /usr/lib/libcrypto.so.1 && \
+    cd /usr/src/openssl-$OPENSSL_VER/ && make clean && \
+    cd / && rm -rf /usr/src/openssl-$OPENSSL_VER
+
 ADD downloads/libcap-2.25.tar.gz /usr/src
 RUN \
     cd /usr/src/libcap-2.25 && \
@@ -102,7 +115,7 @@ RUN \
 	make CFLAGS="$CFLAGS -D__u32=uint32_t -D__le32=uint32_t" -C libcap && \
 	make -C libcap INCDIR=/usr/include LIBDIR=/usr/lib \
 	install && cp -r libcap/include/uapi/linux/ /usr/include/ && \
-	rm -rf /usr/src/libcap-2.25
+	rm -rf /usr/src/libcap-2.25 && rm -f /usr/lib/libcap.so*
 
 ARG PYTHON_VER=2.7.17
 ADD downloads/Python-$PYTHON_VER.tgz /usr/src/
@@ -112,7 +125,8 @@ RUN \
     ./configure --prefix=/usr \
       --without-doc-strings --without-tsc \
       --with-fpectl --with-ensurepip=install --with-signal-module \
-      --enable-ipv6 --enable-$PYTHON_ABI_MODE --enable-unicode=ucs4  CFLAGS="$CFLAGS -DXML_DEV_URANDOM" && \
+      --enable-ipv6 --enable-$PYTHON_ABI_MODE --enable-unicode=ucs4 \
+    CFLAGS="$CFLAGS -DXML_DEV_URANDOM" LDFLAGS="$LDFLAGS -ldl -lpthread -lm" && \
     make && make install && ( if [ x"$PYTHON_ABI_MODE" = x"static" ]; then \
     gcc --without-libgcc -shared -fPIC \
         -o /usr/lib/libpython2.7.so \
@@ -151,13 +165,13 @@ RUN \
 ADD downloads/gobject-introspection-1.32.1.tar.xz /usr/src/
 RUN \
     cd /usr/src/gobject-introspection-1.32.1 && \
-    CFLAGS="$CFLAGS -D_GNU_SOURCE" LDFLAGS="$LDFLAGS -lpython2.7"\
+    LDFLAGS="$LDFLAGS -lpython2.7"\
         ./configure --prefix=/usr --disable-tests && make && \
     make install && rm -rf /usr/src/gobject-introspection-1.32.1
 
 ADD downloads/pygobject-3.2.2.tar.xz /usr/src/
 RUN \
-    cd /usr/src/pygobject-3.2.2 && CFLAGS="$CFLAGS -D_GNU_SOURCE" LDFLAGS="$LDFLAGS -lpython2.7" \
+    cd /usr/src/pygobject-3.2.2 && LDFLAGS="$LDFLAGS -lpython2.7" \
 	./configure --disable-glibtest \
 	--disable-cairo --prefix=/usr --enable-static && make -k ; \
     [ -f ./gi/_glib/.libs/libpyglib-gi-2.0-python.so.0.0.0 ] && \
@@ -192,17 +206,18 @@ RUN \
     sed < lib/krb5/unicode/Makefile.in -e 's@find $(srcdir)@find $(srcdir)/*@' > \
         lib/krb5/unicode/Makefile.in.tmp && \
         mv -f lib/krb5/unicode/Makefile.in.tmp lib/krb5/unicode/Makefile.in && \
-    autoreconf -i && CFLAGS="$CFLAGS -DAI_NUMERICSERV=0x0400" ./configure --prefix=/usr \
-	--without-readline --without-libedit --without-lmdb --without-keyutils --with-crypto-impl=openssl \
+    autoreconf -i && CFLAGS="$CFLAGS -DAI_NUMERICSERV=0x0400" LDFLAGS="$LDFLAGS -pthread" \
+    ./configure --prefix=/usr \
+	--without-readline --without-libedit --without-lmdb --with-crypto-impl=openssl \
 	--without-ldap --without-hesiod --with-size-optimizations --disable-nls --disable-rpath \
 	--disable-aesni --disable-pkinit --enable-dns-for-realm --enable-static --disable-shared \
 	--without-vague-errors --disable-pkinit --disable-athena --with-spake-openssl && \
 	make && make install
 RUN \
-    cp /usr/bin/krb5-config /usr/bin/krb5-config.bak && \
+    cp -vf /usr/bin/krb5-config /usr/bin/krb5-config.bak && \
     sed /usr/bin/krb5-config -e \
 	's@echo $lib_flags@echo "-Wl,-no-undefined -Wl,--start-group $lib_flags -lkrb5support -Wl,--end-group \
-	$GEN_LIB $LIBS $DL_LIB"@g' < /usr/bin/krb5-config.bak > /usr/bin/krb5-config && \
+	$GEN_LIB $LIBS $DL_LIB"@g' /usr/bin/krb5-config.bak > /usr/bin/krb5-config && \
     rm /usr/bin/krb5-config.bak && rm -rf /usr/src/krb5-krb5-$KRB5_VER
 
 ARG ODBC_VER=2.3.7
@@ -217,7 +232,7 @@ RUN \
 ADD downloads/alsa-lib-1.0.15.tar.bz2 /usr/src
 RUN \
    cd /usr/src/alsa-lib-1.0.15/ && \
-	./configure --prefix=/usr --with-versioned --enable-shared \
+	LDFLAGS="$LDFLAGS -ldl" ./configure --prefix=/usr --with-versioned --enable-shared \
 	--disable-static && make && make install && \
 	rm -rf /usr/src/alsa-lib-1.0.15
 
@@ -238,7 +253,7 @@ ARG PG_VER=12.0
 ADD downloads/postgresql-$PG_VER.tar.gz /usr/src
 RUN \
     cd /usr/src/postgresql-$PG_VER && \
-        ./configure --without-gssapi --without-readline \
+        LDFLAGS="$LDFLAGS -lpthread" ./configure --without-gssapi --without-readline \
         --with-openssl --prefix=/usr --sysconfdir=/etc && \
         make -C src/interfaces/libpq install && \
         make -C src/bin/pg_config install && \
@@ -268,8 +283,8 @@ RUN \
     sed -e 's@defined(__GNUC__)@0@g' libmariadb/include/ma_context.h > \
         libmariadb/include/ma_context.h_ && \
     mv -f libmariadb/include/ma_context.h_ libmariadb/include/ma_context.h && \
-    CFLAGS="$CFLAGS -DPTHREAD_MUTEX_RECURSIVE=1" cmake \
-        -DCMAKE_INSTALL_PREFIX=/usr . && make && make install && \
+    cmake -DCONC_WITH_UNIT_TESTS=Off -DWITH_SSL=OPENSSL -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr . && make maodbc && cp -vf libmaodbc.so /usr/lib/ && \
     rm -rf /usr/src/mariadb-connector-odbc-$MYSQLC_VER-ga-src
 
 RUN \
@@ -286,20 +301,10 @@ RUN mkdir -p /build/workspace/project
 RUN \
     find / -xdev ! -uid 0 -or ! -gid 0 -exec chown 0:0 '{}' ';'
 
-FROM scratch
-COPY --from=0 / /
-
-ENV \
-    CFLAGS="-Os -DNDEBUG -fPIC -pipe -L/opt/static" \
-    CXXFLAGS="-Os -DNDEBUG -fPIC -pipe  -L/opt/static" \
-    LDFLAGS="-s -O1 -fPIC -L/opt/static" \
-    LC_ALL=C \
-    TERM= \
-    DEBIAN_FRONTEND=noninteractive \
-    PATH=/usr/local/bin:/usr/bin:/usr/sbin:/bin:/sbin:/build/workspace/project:/build/workspace/.local/bin \
-    WORKSPACE=/build/workspace \
-    PROJECT=/build/workspace/project \
-    TOOLCHAIN_ARCH=x86
+ENV PATH $PATH:/build/workspace/project:/build/workspace/.local/bin
+ENV WORKSPACE /build/workspace
+ENV PROJECT /build/workspace/project
+ENV TOOLCHAIN_ARCH x86
 
 WORKDIR /build/workspace/project
 VOLUME /build/workspace/project
