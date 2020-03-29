@@ -8,12 +8,13 @@ language:
 install:
 - sudo apt-get install -y binfmt-support qemu-user-static
 script:
+- echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json && sudo service docker restart
 - docker login -u="$DOCKER_USER" -p="$DOCKER_PASS"
 - export REPO=alxchk/docker-old-tc
 - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH
   ; fi`
 - cd $TRAVIS_BUILD_DIR/$TC && ./download.sh >/dev/null
-- cd $TRAVIS_BUILD_DIR/$TC && docker build -t alxchk/tc-$TC:$TAG .
+- cd $TRAVIS_BUILD_DIR/$TC && docker build --squash -t alxchk/tc-$TC:$TAG .
 - cd $TRAVIS_BUILD_DIR/$TC && docker push alxchk/tc-$TC:$TAG >/dev/null
 cache:
   - $TRAVIS_BUILD_DIR/$TC/downloads
