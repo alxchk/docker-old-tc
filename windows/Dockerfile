@@ -69,7 +69,7 @@ COPY \
     rc-with-includes ${RCDIR}
 
 ARG PERL_VER=5.28.1.1
-ARG PYTHON_VER=2.7.17
+ARG PYTHON_VER=2.7.18
 
 COPY \
     downloads/VCForPython27.msi \
@@ -119,7 +119,7 @@ RUN \
 COPY wrappers/32 ${WINE32}
 COPY wrappers/64 ${WINE64}
 
-ARG OPENSSL_VER=1.1.1d
+ARG OPENSSL_VER=1.1.1g
 ENV OPENSSL_ABI_VER=1_1
 
 ARG OPENSSL_OPTIONS="shared no-async enable-static-engine no-autoload-config no-cms no-hw no-ssl2 enable-weak-ssl-ciphers no-unit-test no-filenames no-gost no-sctp no-srp no-tests no-ts no-dtls no-dtls1 no-dtls1_2 no-err no-ui"

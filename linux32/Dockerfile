@@ -81,7 +81,7 @@ ENV PATH=/opt/perl5/bin:$PATH
 ENV LDFLAGS -s -Os -fPIC -L/opt/static \
         -static-libgcc -Wl,--no-undefined -Wl,--gc-sections
 
-ARG OPENSSL_VER=1.1.1d
+ARG OPENSSL_VER=1.1.1g
 ADD downloads/openssl-$OPENSSL_VER.tar.gz /usr/src/
 RUN \
     cd /usr/src/openssl-$OPENSSL_VER/ && \
@@ -117,7 +117,7 @@ RUN \
 	install && cp -r libcap/include/uapi/linux/ /usr/include/ && \
 	rm -rf /usr/src/libcap-2.25 && rm -f /usr/lib/libcap.so*
 
-ARG PYTHON_VER=2.7.17
+ARG PYTHON_VER=2.7.18
 ADD downloads/Python-$PYTHON_VER.tgz /usr/src/
 ADD Setup.dist /usr/src/Python-$PYTHON_VER/Modules/Setup.dist
 RUN \
