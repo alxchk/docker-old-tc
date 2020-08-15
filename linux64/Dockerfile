@@ -96,7 +96,7 @@ ADD downloads/openssl-$OPENSSL_VER.tar.gz /usr/src/
 RUN \
     cd /usr/src/openssl-$OPENSSL_VER/ && \
     ./Configure --prefix=/usr \
-        shared no-engine no-autoload-config no-cms \
+        shared no-autoload-config no-cms \
         no-dynamic-engine no-dso no-err no-hw no-ssl2 enable-weak-ssl-ciphers no-unit-test \
         no-filenames no-gost no-sctp no-srp no-tests no-ts \
         no-dtls no-dtls1 no-dtls1_2 linux-x86_64 && \

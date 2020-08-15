@@ -87,7 +87,7 @@ RUN \
     cd /usr/src/openssl-$OPENSSL_VER/ && \
     LDFLAGS="$LDFLAGS -lpthread" \
     ./Configure --prefix=/usr shared \
-        no-autoload-config no-engine no-cms \
+        no-autoload-config no-cms \
         no-dynamic-engine no-dso no-err no-hw no-ssl2 enable-weak-ssl-ciphers no-unit-test \
         no-filenames no-gost no-sctp no-srp no-tests no-ts \
         no-dtls no-dtls1 no-dtls1_2 linux-generic32 && \
