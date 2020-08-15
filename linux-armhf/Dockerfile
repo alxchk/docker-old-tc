@@ -2,7 +2,7 @@ FROM alxchk/linux-armhf
 LABEL maintainer "alxchk@gmail.com"
 
 ENV \
-    LC_ALL=C \
+    LC_ALL=en_US.utf8 \
     MAKEOPTS="-j2" \
     TERM="" \
     DEBIAN_FRONTEND=noninteractive \

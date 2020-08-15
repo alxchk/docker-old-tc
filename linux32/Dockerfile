@@ -5,7 +5,7 @@ LABEL maintainer "alxchk@gmail.com"
 ADD compat /usr/include/
 RUN cat /usr/include/pthread-compat.h >>/usr/include/pthread.h
 
-ENV LC_ALL C
+ENV LC_ALL en_US.utf8
 ENV MAKEOPTS -j2
 ENV TERM ""
 ENV DEBIAN_FRONTEND noninteractive

@@ -1,7 +1,7 @@
 FROM alxchk/linux64
 LABEL maintainer "alxchk@gmail.com"
 
-ENV LC_ALL C
+ENV LC_ALL en_US.utf8
 ENV MAKEOPTS -j2
 ENV TERM ""
 ENV DEBIAN_FRONTEND noninteractive
