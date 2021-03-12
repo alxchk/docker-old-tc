@@ -1,5 +1,5 @@
 android/downloads
-windows/downloads
-linux32/downloads
-linux64/downloads
-linux-armhf/downloads
+windows-py2/downloads
+windows-py3/downloads
+linux/downloads
+linux-woody/downloads
