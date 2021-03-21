@@ -59,7 +59,14 @@ RUN \
     echo "Shutdown" && \
     wineboot -e && wineboot -f && wineboot -s
 
-RUN rm -rf $DOWNLOADS
+RUN \
+    rm -rf $DOWNLOADS && \
+    find \
+        $WINEPREFIX/drive_c/windows \
+        $WINEPREFIX/drive_c/users \
+        \( -iname "*t?mp*" -or -iname "*cache*" \) | xargs rm -rf && \
+    mkdir -p $WINEPREFIX/drive_c/users/root/Temp $WINEPREFIX/drive_c/windows/Temp && \
+    rm -rf $WINEPREFIX/drive_c/windows/assembly
 
 COPY wrappers/32 /opt/32
 COPY wrappers/64 /opt/64
