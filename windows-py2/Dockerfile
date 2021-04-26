@@ -79,7 +79,8 @@ COPY \
     downloads/python-${VER_PYTHON}.msi \
     downloads/python-${VER_PYTHON}.amd64.msi \
     downloads/strawberry-perl-${VER_PERL}-32bit.msi \
-    downloads/strawberry-perl-${VER_PERL}-64bit.msi ${DOWNLOADS}/
+    downloads/strawberry-perl-${VER_PERL}-64bit.msi \
+    ${DOWNLOADS}/
 
 RUN \
     WINEPREFIX=${WINE32} wineserver -k ; \
@@ -102,7 +103,6 @@ RUN \
     echo "Cleanup && winetricks" && \
         rm -f ${DOWNLOADS}/python-${VER_PYTHON}.msi \
             ${DOWNLOADS}/python-${VER_PYTHON}.amd64.msi && \
-    WINEPREFIX=${WINE32} sh ${DOWNLOADS}/winetricks winxp && \
     WINEPREFIX=${WINE64} sh ${DOWNLOADS}/winetricks win7 &&  \
     WINEPREFIX=${WINE32} wine reg \
         add "HKCU\\Software\\Wine\\DllOverrides" /t REG_SZ /v dbghelp /d '' /f && \

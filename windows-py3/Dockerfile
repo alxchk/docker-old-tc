@@ -8,7 +8,7 @@ ARG DOWNLOADS="${BUILDENV}/downloads"
 ARG WINE32="MSVCARCH=32 vcwine"
 ARG WINE64="MSVCARCH=64 vcwine"
 
-RUN yes | (pip install setuptools; CC=gcc pip install pylzma)
+RUN yes | (pip install setuptools; CC=gcc python3 -m pip install pylzma)
 
 ENV \
     DOS_DOWNLOADS="y:" \
